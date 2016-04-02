@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap 101 Template</title>
+
+    <link href="public/bootstrap.min.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+      <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+    nav{
+        margin-bottom: 0px;
+    }
+    .navbar-brand{padding-top: 0;}
+    #logo{
+        position: relative;
+        bottom: 5px;
+        height: 60px;
+    }
+    </style>
+</head>
+  <body>
+    <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#"><img id="logo" src="public/logo2.png" alt="" /></a>
+    </div>
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav" id="navLeft">
+        <li class="active"><a href="bomp/favourite_screens.php" target="right">报告屏 <span class="sr-only">(current)</span></a></li>
+        <li><a href="bomp/favourite_maps.php" target="right">系统拓扑</a></li>
+        <li><a href="bomp/favourite_graphs.php" target="right">重要指标</a></li>
+        <li><a href="cacti/plugins/weathermap/weathermap-cacti-plugin.php" target="right">实时流量</a></li>
+        <!--<li><a href="cacti/plugins/syslog/syslog.php" target="right">系统日志</a></li>-->
+      </ul>
+      <form class="navbar-form navbar-left" role="search" method="GET" action="bomp/search.php" id="search" accept-charset="utf-8" target="right">
+        <input type="hidden" id="form_refresh" name="form_refresh" value="1"/>
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="搜索" name="search" maxlength="255" autocomplete="off">
+        </div>
+        <button type="submit" class="btn btn-default">提交</button>
+      </form>
+      <ul class="nav navbar-nav navbar-right">
+        <li><p class="navbar-text">版本1.0</p></li>
+        <li><p class="navbar-text">当前用户：<?php echo CWebUser::$data['alias'];?></p></li>
+        <li><p class="navbar-text"><?php echo date('Y-m-d');?></p></li>
+        <li><a href="logout.php">退出</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <script src="public/jq.js"></script>
+    <script src="public/bootstrap.min.js"></script>
+    <script>
+$(function(){
+    $("#navLeft>li").click(function(){
+        $(".active").removeClass('active');
+        $(this).addClass('active');
+    })
+})
+    </script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="public/main.css"/>
+<script src="public/jq.js"></script>
+<script src="public/main.js"></script>
+</head>
+<body bgcolor="#EBEFF2">
+    <div id="content">
+        <table width="100%" >
+            <tr>
+                <td rowspan="2" align="center" ><img id="logo" src="public/logo.png" alt="logo"/></td>
+                <td align="right">
+                    <div id="nav_span">
+                        <a>版本ver 1.0<a/>
+                        <a class="user">当前用户:<?php echo CWebUser::$data['alias'];?><a/>
+                        <a href="logout.php">退出</a>
+                    <div/>
+                </td>
+            </tr>
+            <tr align="right">
+                <td>
+                    <div id="nav">
+                        <a href="bomp/favourite_screens.php" target="right">报告屏</a>
+                        <a href="bomp/favourite_maps.php" target="right">系统拓扑</a>
+                        <a href="bomp/favourite_graphs.php" target="right">重要指标</a>
+                        <a href="cacti/plugins/weathermap/weathermap-cacti-plugin.php" target="right">实时流量</a>
+                        <a href="cacti/plugins/syslog/syslog.php" target="right">系统日志</a>
+                        <form method="GET" action="bomp/search.php" id="search" accept-charset="utf-8" target="right">
+                            <input type="hidden" id="form_refresh" name="form_refresh" value="1"/>
+                            <input type="text" name="search" size="10" maxlength="255" autocomplete="off"/>
+                            <input type="submit" value="搜索"/>
+                        </form>
+                        <a><?php echo date('Y-m-d');?><a/>
+                    <div/>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>-->

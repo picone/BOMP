@@ -1,0 +1,13 @@
+--- include/menu.inc.php	2012-07-31 13:16:47.000000000 +0400
++++ include/menu.inc.php	2012-08-13 16:38:12.652739641 +0400
+@@ -218,6 +218,10 @@
+ 				'url' => 'services.php',
+ 				'label' => _('IT services')
+ 			),
++                        array(
++                    		'url' => 'snmp_builder.php',
++                    		'label' => _('SNMP Builder')
++            		),
+ 		)
+ 	),
+ 	'admin' => array(

@@ -1,0 +1,27 @@
+<interface>
+	<name>Get Windows Services</name>
+	<script_path>|path_cacti|/scripts/win_services.php</script_path>
+	<script_function>win_services</script_function>
+	<script_server>php</script_server>
+	<arg_prepend>|host_hostname| |host_snmp_version|:|host_snmp_port|:|host_snmp_timeout|:|host_snmp_community|:|host_snmp_username|:|host_snmp_password|:|host_snmp_auth_protocol|:|host_snmp_priv_passphrase|:|host_snmp_priv_protocol|:|host_snmp_context|</arg_prepend>
+	<arg_index>index</arg_index>
+	<arg_query>query</arg_query>
+	<arg_get>get</arg_get>
+	<output_delimeter>!</output_delimeter>
+	<index_order>ServiceIndex</index_order>
+	<index_order_type>alphabetic</index_order_type>
+	<index_title_format>|chosen_order_field|</index_title_format>
+	<fields>
+		<ServiceIndex>
+			<name>Index</name>
+			<direction>input</direction>
+			<query_name>index</query_name>
+		</ServiceIndex>
+
+		<ServiceState>
+			<name>Service State</name>
+			<direction>output</direction>
+			<query_name>servstate</query_name>
+		</ServiceState>
+	</fields>
+</interface>

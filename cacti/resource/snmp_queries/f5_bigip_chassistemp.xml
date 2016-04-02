@@ -1,0 +1,24 @@
+<temperature>
+    <name>获取 F5 Big-IP 系统机箱温度</name>
+    <index_order_type>numeric</index_order_type>
+    <oid_index>.1.3.6.1.4.1.3375.2.1.3.2.3.2.1.1</oid_index>
+    <oid_num_indexes>.1.3.6.1.4.1.3375.2.1.3.2.3.1.0</oid_num_indexes>
+    <index_order_type>numeric</index_order_type>
+    <index_order>ChassisTempIndex</index_order>
+    <fields>
+        <ChassisTempIndex>
+            <name>索引</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.3.2.3.2.1.1</oid>
+        </ChassisTempIndex>
+        <ChassisTemperature>
+            <name>温度</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.3.2.3.2.1.2</oid>
+        </ChassisTemperature>
+    </fields>
+</temperature>

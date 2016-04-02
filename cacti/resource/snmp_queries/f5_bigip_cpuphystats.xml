@@ -1,0 +1,30 @@
+<cpuphystats>
+    <name>获取 F5 Big-IP CPU 物理状态</name>
+    <index_order_type>numeric</index_order_type>
+    <oid_index>.1.3.6.1.4.1.3375.2.1.3.2.3.2.1.1</oid_index>        
+    <index_order>sysCpuIndex</index_order>
+    <index_order_type>numeric</index_order_type>
+    <fields>
+        <sysCpuIndex>
+            <name>索引</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.3.1.2.1.1</oid>
+        </sysCpuIndex>
+        <sysCpuTemperature>
+            <name>温度</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.3.1.2.1.2</oid>
+        </sysCpuTemperature>
+        <sysCpuFanSpeed>
+            <name>风扇速度</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.3.1.2.1.3</oid>
+        </sysCpuFanSpeed>
+    </fields>
+</cpuphystats>

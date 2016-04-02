@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/ul/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="./public/main.css"/>
+<script src="./public/jq.js"></script>
+<script src="./public/main.js"></script>
+    <script>
+        $(function(){
+        	$(".hideSearch").click(function(){
+        		hideSearch();
+        	})
+            $(".showSearch").click(function(){
+                showSearch();
+            });
+        })
+        function hideSearch() {
+            var topWin = window.top.document.getElementById('top').contentWindow;
+            var search = topWin.document.getElementById('search');
+            search.style.display = "none";
+        }
+        function showSearch() {
+            var topWin = window.top.document.getElementById('top').contentWindow;
+            var search = topWin.document.getElementById('search');
+            search.style.display = "inline";
+        }
+    </script>
+</head>
+<body bgcolor="#EBEFF2">
+    <div>
+        <div class="tabs">
+            <ul>
+                <li class="showSearch current">主机监控</li>
+                <li class="hideSearch">网络监控</li>
+                <li class="hideSearch">系统日志</li>
+            </ul>
+        </div>
+        <div class="content">
+            <p>监控</p>
+            <ul class="block menus">
+                <li class="fatherMenu"><a href="bomp/dashboard.php" target="right">全局状态</a></li>
+                <li class="childMenu">▪&nbsp;<a href="bomp/favourite_graphs.php" target="right">常用图形</a></li>
+                <li class="childMenu">▪&nbsp;<a href="bomp/favourite_screens.php" target="right">常用屏幕</a></li>
+                <li class="childMenu">▪&nbsp;<a href="bomp/favourite_maps.php" target="right">常用拓扑</a></li>
+                <li class="fatherMenu"><a onclick="return false;" style="text-decoration:none;">触发事件</a></li>
+                <li class="childMenu">▪&nbsp;<a href="bomp/tr_status.php" target="right">最新事件</a></li>
+                <li class="childMenu">▪&nbsp;<a href="bomp/events.php" target="right">历史事件</a></li>
+                <li class="fatherMenu"><a href="bomp/srv_status.php?ddreset=1"  target="right">服务SLA</a></li>
+                <li class="fatherMenu"><a href="bomp/maps.php" target="right">拓扑图</a></li>
+                <li class="fatherMenu"><a href="bomp/charts.php?ddreset=1" target="right">指标图形</a></li>
+                <li class="fatherMenu"><a href="bomp/screens.php" target="right">报告屏</a></li>
+                <li class="fatherMenu"><a href="bomp/httpmon.php" target="right">Web监控</a></li>
+                <li class="fatherMenu"><a href="bomp/discovery.php" target="right">网络发现</a></li>
+                <li class="fatherMenu"><a href="bomp/latest.php" target="right">最新数据</a></li>
+                <li class="fatherMenu"><a href="bomp/overview.php" target="right">全部数据</a></li>
+            </ul>
+            <p>报表</p>
+            <ul class="menus">
+                <li class="fatherMenu"><a href="bomp/report_collect.php" target="right">汇总报表</a></li>
+                <li class="fatherMenu"><a href="bomp/report_top.php" target="right">Top10排名</a></li>
+                <li class="fatherMenu"><a href="bomp/report_screens.php" target="right">报告屏报表</a></li>
+                <li class="fatherMenu"><a href="bomp/report_status.php" target="right">可用性报表</a></li>
+                <li class="fatherMenu"><a href="bomp/report_event.php" target="right">事件响应报表</a></li>
+                <li class="fatherMenu"><a href="bomp/report_compare.php" target="right">对比指标报表</a></li>
+            </ul>
+            <p>资产管理</p>
+            <ul class="menus">
+                <li class="fatherMenu"><a href="bomp/hosts.php?action=host.list" target="right">设备列表</a></li>
+                <li class="fatherMenu"><a href="bomp/hostinventories.php?ddreset=1" target="right">设备查询</a></li>
+            </ul>
+            <p>配置</p>
+            <ul class="menus">
+                <li class="fatherMenu"><a href="bomp/hostgroups.php" target="right">设备组</a></li>
+                <li class="fatherMenu"><a href="bomp/hosts.php" target="right">设备</a></li>
+                <li class="fatherMenu"><a href="bomp/templates.php" target="right">管理模板</a></li>
+                <li class="fatherMenu"><a href="bomp/maintenance.php" target="right">维护窗口</a></li>
+                <li class="fatherMenu"><a href="bomp/services.php" target="right">服务SLA</a></li>
+                <li class="fatherMenu"><a href="bomp/actionconf.php" target="right">响应动作</a></li>
+                <li class="fatherMenu"><a href="bomp/screenconf.php" target="right">报告屏</a></li>
+                <li class="fatherMenu"><a href="bomp/slideconf.php" target="right">屏幕指示</a></li>
+                <li class="fatherMenu"><a href="bomp/sysmaps.php" target="right">拓扑图</a></li>
+                <li class="fatherMenu"><a href="bomp/discoveryconf.php" target="right">节点发现</a>
+            </ul>
+            <p>管理</p>
+            <ul class="menus">
+                <li class="fatherMenu"><a href="bomp/adm.gui.php" target="right">界面</a></li>
+                <li class="fatherMenu"><a href="bomp/proxies.php" target="right">代理</a></li>
+                <li class="fatherMenu"><a href="bomp/authentication.php" target="right">权限</a></li>
+                <li class="fatherMenu"><a href="bomp/usergrps.php" target="right">用户</a></li>
+                <li class="fatherMenu"><a href="bomp/media_types.php" target="right">传信设置</a></li>
+                <li class="fatherMenu"><a href="bomp/scripts.php" target="right">脚本设置</a></li>
+                <li class="fatherMenu"><a href="bomp/auditlogs.php" target="right">审计日志</a></li>
+                <li class="fatherMenu"><a href="bomp/queue.php" target="right">采集状态</a></li>
+                <li class="fatherMenu"><a href="bomp/report4.php" target="right">传信汇总</a></li>
+            </ul>
+        </div>
+        <div class="content hide">
+            <div>
+                <p>状态</p>
+                <ul class="block menus">
+                    <li class="fatherMenu"><a href="cacti/plugins/weathermap/weathermap-cacti-plugin.php" target="right">流量图</a></li>
+                    <li class="fatherMenu"><a href="cacti/graph_view.php?action=tree" target="right">设备状态</a></li>
+                    <li class="fatherMenu"><a href="cacti/graph_view.php?action=preview" target="right">图表查询</a></li>
+                </ul>
+                <p>配置</p>
+                <ul class="menus">
+                    <li class="fatherMenu"><a href="cacti/data_sources.php" target="right">数据源</a></li>
+                    <li class="fatherMenu"><a href="cacti/host.php" target="right">设备</a></li>
+                    <li class="fatherMenu"><a href="cacti/tree.php" target="right">结构树</a></li>
+                    <li class="fatherMenu"><a href="cacti/plugins/weathermap/weathermap-cacti-plugin-mgmt.php" target="right">流量图</a></li>
+                    <li class="fatherMenu"><a href="cacti/host_templates.php" target="right">主机模板</a></li>
+                    <li class="fatherMenu"><a href="cacti/plugins/thold/listthold.php" target="right">阈值</a></li>
+                    <li class="fatherMenu"><a href="cacti/settings.php" target="right">参数设置</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="content hide">
+            <div>
+                <p>系统日志</p>
+                    <ul class="block menus">
+                        <li class="fatherMenu"><a href="cacti/plugins/syslog/syslog.php?tab=syslog" target="right">Syslog</a></li>
+                        <li class="fatherMenu"><a href="cacti/plugins/syslog/syslog.php?tab=stats" target="right">统计</a></li>
+                        <li class="fatherMenu"><a href="cacti/plugins/syslog/syslog.php?tab=alerts" target="right">报警日志</a></li>
+                    </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

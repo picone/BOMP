@@ -1,0 +1,31 @@
+<fan>
+    <name>获取F5 Big-IP sysChassisFan 状态</name>
+    <index_order_type>numeric</index_order_type>
+    <oid_index>.1.3.6.1.4.1.3375.2.1.3.2.1.2.1</oid_index>        
+    <oid_num_indexes>.1.3.6.1.4.1.3375.2.1.3.2.1.1.0</oid_num_indexes>
+    <index_order>sysChassisFanIndex</index_order>
+    <index_order_type>numeric</index_order_type>
+    <fields>
+        <sysChassisFanIndex>
+            <name>索引</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.3.2.1.2.1.1</oid>
+        </sysChassisFanIndex>
+        <sysChassisFanStatus>
+            <name>状态</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>input</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.3.2.1.2.1.2</oid>
+        </sysChassisFanStatus>
+        <sysChassisFanSpeed>
+            <name>速度</name>
+            <method>walk</method>
+            <source>value</source>
+            <direction>output</direction>
+            <oid>.1.3.6.1.4.1.3375.2.1.3.2.1.2.1.3</oid>
+        </sysChassisFanSpeed>
+    </fields>
+</fan>
