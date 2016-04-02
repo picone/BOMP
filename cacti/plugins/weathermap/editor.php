@@ -99,16 +99,18 @@ if(isset($_REQUEST['selected'])) { $selected = $_REQUEST['selected']; }
 
 $weathermap_debugging=FALSE;
 
-if($mapname == '')
+$mapfile = $mapdir.'/'.$mapname;
+
+if($mapname == ''||$action=='delete_map')
 {
+	if($action=='delete_map'&&file_exists($mapfile)){
+		unlink($mapfile);
+	}
 	// this is the file-picker/welcome page
 	show_editor_startpage();
 }
 else
-{  
-	// everything else in this file is inside this else
-	$mapfile = $mapdir.'/'.$mapname;        
-
+{
 	debug("==========================================================================================================\n");
 	debug("Starting Edit Run: action is $action on $mapname\n");
 	debug("==========================================================================================================\n");
@@ -854,7 +856,6 @@ else
 
 		$map->WriteConfig($mapfile);
 		break;
-
 		// no action was defined - starting a new map?
 	default:
 		$map->ReadConfig($mapfile);

@@ -123,7 +123,7 @@ function show_editor_startpage()
             $errorstring = "气象图目录无文件"; 
         }
 	} else { 
-        $errorstring = "$mapdir不是一个目录"; 
+        $errorstring = "${mapdir}不是一个目录";
     }
 
 
@@ -155,7 +155,7 @@ function show_editor_startpage()
 			$title = $titles[$file];
 			$note = $notes[$file];
 			$nicefile = htmlspecialchars($file);
-			print "<li>$note<a href=\"?mapname=$nicefile&plug=$fromplug\">$nicefile</a> - <span class=\"comment\">$title</span></li>\n";
+			print "<li>$note<a href=\"?mapname=$nicefile&plug=$fromplug\">$nicefile</a> - <span class=\"comment\">$title</span> - <a href=\"?action=delete_map&mapname=$nicefile\" class=\"comment\">(删除)</a></li>\n";
 		}
 	} else {
 		print '<li>'.$errorstring.'</li>';
