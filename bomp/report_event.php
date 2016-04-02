@@ -36,7 +36,7 @@ if (hasRequest('csv_export')) {
     $page['title'] ='事件响应报告';
     $page['file'] = 'events.php';
     $page['hist_arg'] = array('groupid', 'hostid');
-    $page['scripts'] = array('class.calendar.js', 'gtlc.js');
+    $page['scripts'] = array('class.calendar.js', 'gtlc.js','multiselect.js');
     $page['type'] = detect_page_type(PAGE_TYPE_HTML);
 }
 
@@ -89,17 +89,43 @@ $source = getRequest('source', CProfile::get('web.events.source', EVENT_SOURCE_T
 if (hasRequest('filter_set')) {
     CProfile::update('web.events.filter.triggerid', getRequest('triggerid', 0), PROFILE_TYPE_ID);
     CProfile::update('web.events.filter.limit',getRequest('limit',50),PROFILE_TYPE_INT);
+    CProfile::update('web.events.filter.acknowledge',getRequest('acknowledge',-1),PROFILE_TYPE_INT);
+    CProfile::update('web.events.filter.status',getRequest('status',-1),PROFILE_TYPE_INT);
+    CProfile::update('web.events.filter.priority',getRequest('priority',0),PROFILE_TYPE_INT);
+    CProfile::update('web.events.filter.priority',getRequest('priority',0),PROFILE_TYPE_INT);
+    CProfile::updateArray('web.events.filter.hostids',getRequest('hostids',array()),PROFILE_TYPE_STR);
 }
 elseif (hasRequest('filter_rst')) {
     DBStart();
     CProfile::delete('web.events.filter.triggerid');
     CProfile::delete('web.events.filter.limit');
+    CProfile::delete('web.events.filter.acknowledge');
+    CProfile::delete('web.events.filter.status');
+    CProfile::delete('web.events.filter.priority');
+    CProfile::deleteIdx('web.events.filter.groupids');
+    CProfile::deleteIdx('web.events.filter.hostids');
     DBend();
 }
 
 $triggerId = CProfile::get('web.events.filter.triggerid', 0);
-$limit=intval(CProfile::get('web.events.filter.limit',50));
-CWebUser::$data['rows_per_page']=$limit;
+$filter=array(
+    'limit'=>intval(CProfile::get('web.events.filter.limit',50)),
+    'acknowledge'=>intval(CProfile::get('web.events.filter.acknowledge',-1)),
+    'status'=>intval(CProfile::get('web.events.filter.status',-1)),
+    'priority'=>intval(CProfile::get('web.events.filter.priority',0)),
+    'hostids'=>CProfile::getArray('web.events.filter.hostids'),
+);
+
+if(isset($filter['hostids'][0])){
+    $filter['groupids']=null;
+    CProfile::deleteIdx('web.events.filter.groupids');
+}else{
+    CProfile::updateArray('web.events.filter.groupids',getRequest('groupids',array()),PROFILE_TYPE_STR);
+    $filter['groupids']=CProfile::getArray('web.events.filter.groupids');
+}
+if($filter['acknowledge']<0)$filter['acknowledge']=null;
+if($filter['status']<0)$filter['status']=null;
+CWebUser::$data['rows_per_page']=$filter['limit'];
 $line_num=0;
 
 CProfile::update('web.events.source', $source, PROFILE_TYPE_INT);
@@ -166,8 +192,7 @@ else {
         // try to find matching trigger when host is changed
         // use the host ID from the page filter since it may not be present in the request
         // if all hosts are selected, preserve the selected trigger
-        if ($triggerId != 0 && $pageFilter->hostid != 0) {
-            $hostId = $pageFilter->hostid;
+        if ($triggerId != 0 && isset($filter['hostids'][0])) {
 
             $oldTriggers = API::Trigger()->get(array(
                 'output' => array('triggerid', 'description', 'expression'),
@@ -181,68 +206,70 @@ else {
             $oldTrigger['hosts'] = zbx_toHash($oldTrigger['hosts'], 'hostid');
 
             // if the trigger doesn't belong to the selected host - find a new one on that host
-            if (!isset($oldTrigger['hosts'][$hostId])) {
-                $triggerId = 0;
+            foreach($filter['hostids'] as &$val){
+                if (!isset($oldTrigger['hosts'][$val])) {
+                    $triggerId = 0;
 
-                $oldTrigger['items'] = zbx_toHash($oldTrigger['items'], 'itemid');
-                $oldTrigger['functions'] = zbx_toHash($oldTrigger['functions'], 'functionid');
-                $oldExpression = triggerExpression($oldTrigger);
+                    $oldTrigger['items'] = zbx_toHash($oldTrigger['items'], 'itemid');
+                    $oldTrigger['functions'] = zbx_toHash($oldTrigger['functions'], 'functionid');
+                    $oldExpression = triggerExpression($oldTrigger);
 
-                $newTriggers = API::Trigger()->get(array(
-                    'output' => array('triggerid', 'description', 'expression'),
-                    'selectHosts' => array('hostid', 'host'),
-                    'selectItems' => array('itemid', 'key_'),
-                    'selectFunctions' => API_OUTPUT_EXTEND,
-                    'filter' => array('description' => $oldTrigger['description']),
-                    'hostids' => $hostId
-                ));
+                    $newTriggers = API::Trigger()->get(array(
+                        'output' => array('triggerid', 'description', 'expression'),
+                        'selectHosts' => array('hostid', 'host'),
+                        'selectItems' => array('itemid', 'key_'),
+                        'selectFunctions' => API_OUTPUT_EXTEND,
+                        'filter' => array('description' => $oldTrigger['description']),
+                        'hostids' => $filter['hostids']
+                    ));
 
-                foreach ($newTriggers as $newTrigger) {
-                    if (count($oldTrigger['items']) != count($newTrigger['items'])) {
-                        continue;
-                    }
+                    foreach ($newTriggers as $newTrigger) {
+                        if (count($oldTrigger['items']) != count($newTrigger['items'])) {
+                            continue;
+                        }
 
-                    $newTrigger['items'] = zbx_toHash($newTrigger['items'], 'itemid');
-                    $newTrigger['hosts'] = zbx_toHash($newTrigger['hosts'], 'hostid');
-                    $newTrigger['functions'] = zbx_toHash($newTrigger['functions'], 'functionid');
+                        $newTrigger['items'] = zbx_toHash($newTrigger['items'], 'itemid');
+                        $newTrigger['hosts'] = zbx_toHash($newTrigger['hosts'], 'hostid');
+                        $newTrigger['functions'] = zbx_toHash($newTrigger['functions'], 'functionid');
 
-                    $found = false;
-                    foreach ($newTrigger['functions'] as $fnum => $function) {
-                        foreach ($oldTrigger['functions'] as $ofnum => $oldFunction) {
-                            // compare functions
-                            if (($function['function'] != $oldFunction['function']) || ($function['parameter'] != $oldFunction['parameter'])) {
-                                continue;
+                        $found = false;
+                        foreach ($newTrigger['functions'] as $fnum => $function) {
+                            foreach ($oldTrigger['functions'] as $ofnum => $oldFunction) {
+                                // compare functions
+                                if (($function['function'] != $oldFunction['function']) || ($function['parameter'] != $oldFunction['parameter'])) {
+                                    continue;
+                                }
+                                // compare that functions uses same item keys
+                                if ($newTrigger['items'][$function['itemid']]['key_'] != $oldTrigger['items'][$oldFunction['itemid']]['key_']) {
+                                    continue;
+                                }
+                                // rewrite itemid so we could compare expressions
+                                // of two triggers form different hosts
+                                $newTrigger['functions'][$fnum]['itemid'] = $oldFunction['itemid'];
+                                $found = true;
+
+                                unset($oldTrigger['functions'][$ofnum]);
+                                break;
                             }
-                            // compare that functions uses same item keys
-                            if ($newTrigger['items'][$function['itemid']]['key_'] != $oldTrigger['items'][$oldFunction['itemid']]['key_']) {
-                                continue;
+                            if (!$found) {
+                                break;
                             }
-                            // rewrite itemid so we could compare expressions
-                            // of two triggers form different hosts
-                            $newTrigger['functions'][$fnum]['itemid'] = $oldFunction['itemid'];
-                            $found = true;
-
-                            unset($oldTrigger['functions'][$ofnum]);
-                            break;
                         }
                         if (!$found) {
+                            continue;
+                        }
+
+                        // if we found same trigger we overwriting it's hosts and items for expression compare
+                        $newTrigger['hosts'] = $oldTrigger['hosts'];
+                        $newTrigger['items'] = $oldTrigger['items'];
+
+                        $newExpression = triggerExpression($newTrigger);
+
+                        if (strcmp($oldExpression, $newExpression) == 0) {
+                            CProfile::update('web.events.filter.triggerid', $newTrigger['triggerid'], PROFILE_TYPE_ID);
+                            $triggerId = $newTrigger['triggerid'];
                             break;
                         }
-                    }
-                    if (!$found) {
-                        continue;
-                    }
-
-                    // if we found same trigger we overwriting it's hosts and items for expression compare
-                    $newTrigger['hosts'] = $oldTrigger['hosts'];
-                    $newTrigger['items'] = $oldTrigger['items'];
-
-                    $newExpression = triggerExpression($newTrigger);
-
-                    if (strcmp($oldExpression, $newExpression) == 0) {
-                        CProfile::update('web.events.filter.triggerid', $newTrigger['triggerid'], PROFILE_TYPE_ID);
-                        $triggerId = $newTrigger['triggerid'];
-                        break;
                     }
                 }
             }
@@ -316,14 +343,44 @@ else {
             if (!isset($trigger)) {
                 $trigger = '';
             }
+            //行数
             $filterForm->addRow(new CRow(array(
-                new CCol('显示行数'),
-                new CCol(new CTextBox('limit',$limit,40))
+                new CCol('显示行数','form_row_c'),
+                new CCol(new CTextBox('limit',$filter['limit'],50))
             )));
+            //状态
+            $statusComboBox=new CComboBox('status',getRequest('status'));
+            $statusComboBox->addItem(-1,_('All'));
+            $statusComboBox->addItem(0,_('Normal'));
+            $statusComboBox->addItem(1,_('Problem'));
             $filterForm->addRow(new CRow(array(
-                new CCol(_('Trigger'), 'form_row_l'),
+                new CCOl(_('Status'),'form_row_c'),
+                new CCol($statusComboBox)
+            )));
+            //严重性
+            $priorityComboBox=new CComboBox('priority',$filter['priority']);
+            $data=getSeverityCaption();
+            foreach($data as $key=>&$val){
+                $priorityComboBox->addItem($key,_($val));
+            }
+            $filterForm->addRow(new CRow(array(
+                new CCOl(_('Severity'),'form_row_c'),
+                new CCol($priorityComboBox)
+            )));
+            //知悉
+            $ackComboBox=new CComboBox('acknowledge',getRequest('acknowledge'));
+            $ackComboBox->addItem(-1,_('All'));
+            $ackComboBox->addItem(0,'未知悉');
+            $ackComboBox->addItem(1,_('Acknowledged'));
+            $filterForm->addRow(new CRow(array(
+                new CCOl(_('Acknowledges'),'form_row_c'),
+                new CCol($ackComboBox)
+            )));
+            //触发器
+            $filterForm->addRow(new CRow(array(
+                new CCol(_('Trigger'), 'form_row_c'),
                 new CCol(array(
-                    new CTextBox('trigger', $trigger, 96,true),
+                    new CTextBox('trigger', $trigger,50,true),
                     new CButton('btn1', _('Select'),
                         'return PopUp("popup.php?'.
                         'dstfrm='.$filterForm->getName().
@@ -335,13 +392,69 @@ else {
                         '&real_hosts=1'.
                         '&monitored_hosts=1'.
                         '&with_monitored_triggers=1'.
-                        ($pageFilter->hostid ? '&only_hostid='.$pageFilter->hostid : '').
+                        //($pageFilter->hostid ? '&only_hostid='.$pageFilter->hostid : '').
                         '");',
                         'T'
                     )
                 ), 'form_row_r')
             )));
-
+            //群组
+            $multiSelectHostGroupData=array();
+            if ($filter['groupids']!==null){
+                $filterGroups=API::HostGroup()->get(array(
+                    'output'=>array('groupid','name'),
+                    'groupids'=>$filter['groupids']
+                ));
+                foreach ($filterGroups as $group){
+                    $multiSelectHostGroupData[]=array(
+                        'id'=>$group['groupid'],
+                        'name'=>$group['name']
+                    );
+                }
+            }
+            $filterForm->addRow(new CRow(array(
+                new CCol(_('Host groups'),'form_row_c'),
+                new CCol(new CMultiSelect(array(
+                    'name'=>'groupids[]',
+                    'objectName'=>'hostGroup',
+                    'data'=>$multiSelectHostGroupData,
+                    'popup'=>array(
+                        'parameters'=>'srctbl=host_groups&dstfrm='.$filterForm->getName().'&dstfld1=groupids_&srcfld1=groupid&multiselect=1',
+                        'width'=>450,
+                        'height'=>450,
+                        'buttonClass'=>'input filter-multiselect-select-button'
+                    )
+                )))
+            )));
+            //主机
+            $multiSelectHostData = array();
+            if ($filter['hostids']){
+                $filterHosts=API::Host()->get(array(
+                    'output'=>array('hostid','name'),
+                    'hostids'=>$filter['hostids']
+                ));
+                foreach ($filterHosts as $host) {
+                    $multiSelectHostData[]=array(
+                        'id'=>$host['hostid'],
+                        'name'=>$host['name']
+                    );
+                }
+            }
+            $filterForm->addRow(new CRow(array(
+                new CCol(_('Hosts'),'form_row_c'),
+                new CCol(new CMultiSelect(array(
+                    'name'=>'hostids[]',
+                    'objectName'=>'hosts',
+                    'data'=>$multiSelectHostData,
+                    'popup'=>array(
+                        'parameters'=>'srctbl=hosts&dstfrm='.$filterForm->getName().'&dstfld1=hostids_&srcfld1=hostid&real_hosts=1&multiselect=1',
+                        'width'=>450,
+                        'height'=>450,
+                        'buttonClass'=>'input filter-multiselect-select-button'
+                    )
+                )))
+            )));
+            
             $filterForm->addItemToBottomRow(new CSubmit('filter_set', _('Filter')));
             $filterForm->addItemToBottomRow(new CSubmit('filter_rst', _('Reset')));
         }
@@ -407,15 +520,8 @@ if ($source == EVENT_SOURCE_DISCOVERY) {
         _('Description'),
         _('Status')
     );
-
-    if ($csvExport) {
-        $csvRows[] = $header;
-    }
-    else {
-        $table->setHeader($header);
-    }
-}
-else {
+    $table->setHeader($header);
+}else{
     $header = array(
         _('Time'),
         (getRequest('hostid', 0) == 0) ? _('Host') : null,
@@ -426,13 +532,7 @@ else {
         $config['event_ack_enable'] ? _('Ack') : null,
         _('Actions')
     );
-
-    if ($csvExport) {
-        $csvRows[] = $header;
-    }
-    else {
-        $table->setHeader($header);
-    }
+    $table->setHeader($header);
 }
 
 if (!$firstEvent) {
@@ -567,249 +667,253 @@ else {
     }
 
     // source not discovery i.e. trigger
-    else {
-        if ($csvExport || $pageFilter->hostsSelected) {
-            $knownTriggerIds = array();
-            $validTriggerIds = array();
+    else{
+        $knownTriggerIds = array();
+        $validTriggerIds = array();
 
-            $triggerOptions = array(
+        $triggerOptions = array(
+            'output' => array('triggerid'),
+            'preservekeys' => true,
+            'monitored' => true
+        );
+
+        $allEventsSliceLimit = $config['search_limit'];
+
+        //严重性过滤
+        if($filter['priority']>0){
+            $object_id=API::Trigger()->get(array(
+                'min_severity'=>$filter['priority'],
+                'output'=>array('objectid')
+            ));
+            $object_id=zbx_objectValues($object_id,'triggerid');
+        }else{
+            $object_id=null;
+        }
+        
+        $eventOptions = array(
+            'source' => EVENT_SOURCE_TRIGGERS,
+            'object' => EVENT_OBJECT_TRIGGER,
+            'objectids'=>$object_id,
+            'time_from' => $from,
+            'time_till' => $till,
+            'output' => array('eventid', 'objectid'),
+            'sortfield' => array('clock', 'eventid'),
+            'sortorder' => ZBX_SORT_DOWN,
+            'acknowledged'=>$filter['acknowledge'],
+            'value'=>$filter['status'],
+            'limit' => $allEventsSliceLimit + 1
+        );
+
+        if($triggerId){
+            $knownTriggerIds = array($triggerId => $triggerId);
+            $validTriggerIds = $knownTriggerIds;
+            $eventOptions['objectids'] = array($triggerId);
+        }else if(isset($filter['hostids'][0])){
+            $hostTriggers = API::Trigger()->get(array(
                 'output' => array('triggerid'),
-                'preservekeys' => true,
-                'monitored' => true
-            );
-
-            $allEventsSliceLimit = $config['search_limit'];
-
-            $eventOptions = array(
-                'source' => EVENT_SOURCE_TRIGGERS,
-                'object' => EVENT_OBJECT_TRIGGER,
-                'time_from' => $from,
-                'time_till' => $till,
-                'output' => array('eventid', 'objectid'),
-                'sortfield' => array('clock', 'eventid'),
-                'sortorder' => ZBX_SORT_DOWN,
-                'limit' => $allEventsSliceLimit + 1
-            );
-
-            if ($triggerId) {
-                $knownTriggerIds = array($triggerId => $triggerId);
-                $validTriggerIds = $knownTriggerIds;
-
-                $eventOptions['objectids'] = array($triggerId);;
-            }
-            elseif ($pageFilter->hostid > 0) {
-                $hostTriggers = API::Trigger()->get(array(
-                    'output' => array('triggerid'),
-                    'hostids' => $pageFilter->hostid,
-                    'monitored' => true,
-                    'preservekeys' => true
-                ));
-                $filterTriggerIds = array_map('strval', array_keys($hostTriggers));
-                $knownTriggerIds = array_combine($filterTriggerIds, $filterTriggerIds);
-                $validTriggerIds = $knownTriggerIds;
-
-                $eventOptions['hostids'] = $pageFilter->hostid;
-                $eventOptions['objectids'] = $validTriggerIds;
-            }
-            elseif ($pageFilter->groupid > 0) {
-                $eventOptions['groupids'] = $pageFilter->groupid;
-
-                $triggerOptions['groupids'] = $pageFilter->groupid;
-            }
-
-            $events = array();
-
-            while (true) {
-                $allEventsSlice = API::Event()->get($eventOptions);
-
-                $triggerIdsFromSlice = array_keys(array_flip(zbx_objectValues($allEventsSlice, 'objectid')));
-
-                $unknownTriggerIds = array_diff($triggerIdsFromSlice, $knownTriggerIds);
-
-                if ($unknownTriggerIds) {
-                    $triggerOptions['triggerids'] = $unknownTriggerIds;
-                    $validTriggersFromSlice = API::Trigger()->get($triggerOptions);
-
-                    foreach ($validTriggersFromSlice as $trigger) {
-                        $validTriggerIds[$trigger['triggerid']] = $trigger['triggerid'];
-                    }
-
-                    foreach ($unknownTriggerIds as $id) {
-                        $id = strval($id);
-                        $knownTriggerIds[$id] = $id;
-                    }
-                }
-
-                foreach ($allEventsSlice as $event) {
-                    if (isset($validTriggerIds[$event['objectid']])) {
-                        $events[] = array('eventid' => $event['eventid']);
-                    }
-                }
-
-                // break loop when either enough events have been retrieved, or last slice was not full
-                if (count($events) >= $config['search_limit'] || count($allEventsSlice) <= $allEventsSliceLimit) {
-                    break;
-                }
-                /*
-                 * Because events in slices are sorted descending by eventid (i.e. bigger eventid),
-                 * first event in next slice must have eventid that is previous to last eventid in current slice.
-                 */
-                $lastEvent = end($allEventsSlice);
-                $eventOptions['eventid_till'] = $lastEvent['eventid'] - 1;
-            }
-
-            /*
-             * At this point it is possible that more than $config['search_limit'] events are selected,
-             * therefore at most only first $config['search_limit'] + 1 events will be used for pagination.
-             */
-            $events = array_slice($events, 0, $config['search_limit'] + 1);
-
-            // get paging
-            $paging = getPagingLine($events);
-            $line_num=count($events);
-
-            // query event with extend data
-            $events = API::Event()->get(array(
-                'source' => EVENT_SOURCE_TRIGGERS,
-                'object' => EVENT_OBJECT_TRIGGER,
-                'eventids' => zbx_objectValues($events, 'eventid'),
-                'output' => API_OUTPUT_EXTEND,
-                'select_acknowledges' => API_OUTPUT_COUNT,
-                //'acknowledged'=>true,
-                //'value'=>1,
-                'sortfield' => array('clock', 'eventid'),
-                'sortorder' => ZBX_SORT_DOWN,
-                'nopermissions' => true,
-                'limit'=>$limit
-            ));
-
-            if (!$csvExport) {
-                $csvDisabled = zbx_empty($events);
-            }
-
-            $triggers = API::Trigger()->get(array(
-                'output' => array('triggerid', 'description', 'expression', 'priority', 'flags', 'url'),
-                'selectHosts' => array('hostid', 'name', 'status'),
-                'selectItems' => array('itemid', 'hostid', 'name', 'key_', 'value_type'),
-                'triggerids' => zbx_objectValues($events, 'objectid')
-            ));
-            $triggers = zbx_toHash($triggers, 'triggerid');
-
-            // fetch hosts
-            $hosts = array();
-            foreach ($triggers as $trigger) {
-                $hosts[] = reset($trigger['hosts']);
-            }
-            $hostids = zbx_objectValues($hosts, 'hostid');
-
-            $hosts = API::Host()->get(array(
-                'output' => array('name', 'hostid', 'status'),
-                'hostids' => $hostids,
-                'selectGraphs' => API_OUTPUT_COUNT,
-                'selectScreens' => API_OUTPUT_COUNT,
+                'hostids' =>$filter['hostids'],
+                'monitored' => true,
                 'preservekeys' => true
             ));
+            $filterTriggerIds = array_map('strval', array_keys($hostTriggers));
+            $knownTriggerIds = array_combine($filterTriggerIds, $filterTriggerIds);
+            $validTriggerIds = $knownTriggerIds;
 
-            // fetch scripts for the host JS menu
-            if (!$csvExport && getRequest('hostid', 0) == 0) {
-                $scripts = API::Script()->getScriptsByHosts($hostids);
-            }
+            $eventOptions['hostids'] =$filter['hostids'];
+            $eventOptions['objectids'] = $validTriggerIds;
+        }else if(isset($filter['groupids'][0])){
+            $eventOptions['groupids']=$triggerOptions['groupids']=$filter['groupids'];
+        }
+        
+        $events = array();
 
-            // actions
-            $actions = getEventActionsStatus(zbx_objectValues($events, 'eventid'));
+        while (true) {
+            $allEventsSlice = API::Event()->get($eventOptions);
 
-            // events
-            foreach ($events as $event) {
-                $trigger = $triggers[$event['objectid']];
+            $triggerIdsFromSlice = array_keys(array_flip(zbx_objectValues($allEventsSlice, 'objectid')));
 
-                $host = reset($trigger['hosts']);
-                $host = $hosts[$host['hostid']];
+            $unknownTriggerIds = array_diff($triggerIdsFromSlice, $knownTriggerIds);
 
-                $description = CMacrosResolverHelper::resolveEventDescription(zbx_array_merge($trigger, array(
-                    'clock' => $event['clock'],
-                    'ns' => $event['ns']
-                )));
+            if ($unknownTriggerIds) {
+                $triggerOptions['triggerids'] = $unknownTriggerIds;
+                $validTriggersFromSlice = API::Trigger()->get($triggerOptions);
 
-                // duration
-                $event['duration'] = ($nextEvent = get_next_event($event, $events))
-                    ? zbx_date2age($event['clock'], $nextEvent['clock'])
-                    : zbx_date2age($event['clock']);
-
-                // action
-                $action = isset($actions[$event['eventid']]) ? $actions[$event['eventid']] : ' - ';
-
-                if ($csvExport) {
-                    $csvRows[] = array(
-                        zbx_date2str(DATE_TIME_FORMAT_SECONDS, $event['clock']),
-                        (getRequest('hostid', 0) == 0) ? $host['name'] : null,
-                        $description,
-                        trigger_value2str($event['value']),
-                        getSeverityCaption($trigger['priority']),
-                        $event['duration'],
-                        $config['event_ack_enable'] ? ($event['acknowledges'] ? _('Yes') : _('No')) : null,
-                        strip_tags((string) $action)
-                    );
+                foreach ($validTriggersFromSlice as $trigger) {
+                    $validTriggerIds[$trigger['triggerid']] = $trigger['triggerid'];
                 }
-                else {
-                    $triggerDescription = new CSpan($description, 'pointer link_menu');
-                    $triggerDescription->setMenuPopup(
-                        CMenuPopupHelper::getTrigger($trigger, null, $event['clock'])
-                    );
 
-                    // acknowledge
-                    $ack = getEventAckState($event,'report_event.php');
-
-                    // add colors and blinking to span depending on configuration and trigger parameters
-                    $statusSpan = new CSpan(trigger_value2str($event['value']));
-
-                    addTriggerValueStyle(
-                        $statusSpan,
-                        $event['value'],
-                        $event['clock'],
-                        $event['acknowledged']
-                    );
-
-                    // host JS menu link
-                    $hostName = null;
-
-                    if (getRequest('hostid', 0) == 0) {
-                        $hostName = new CSpan($host['name'], 'link_menu');
-                        $hostName->setMenuPopup(CMenuPopupHelper::getHost($host, $scripts[$host['hostid']]));
-                    }
-
-                    $table->addRow(array(
-                        new CLink(zbx_date2str(DATE_TIME_FORMAT_SECONDS, $event['clock']),
-                            'tr_events.php?triggerid='.$event['objectid'].'&eventid='.$event['eventid'],
-                            'action'
-                        ),
-                        $hostName,
-                        $triggerDescription,
-                        $statusSpan,
-                        getSeverityCell($trigger['priority'], null, !$event['value']),
-                        $event['duration'],
-                        $config['event_ack_enable'] ? $ack : null,
-                        $action
-                    ));
-                    if($event['acknowledged']>0){
-                        $e= DBselect(
-                            'SELECT a.*,u.alias,u.name,u.surname'.
-                            ' FROM acknowledges a'.
-                            ' LEFT JOIN users u ON u.userid=a.userid'.
-                            ' WHERE a.eventid='.zbx_dbstr($event['eventid'])
-                        );
-                        while ($acknowledge = DBfetch($e)){
-                            $table->addRow(array(
-                                SPACE,
-                                zbx_date2str(DATE_TIME_FORMAT_SECONDS,$acknowledge['clock']),
-                                new CCol($acknowledge['alias'].'('.$acknowledge['name'].' '.$acknowledge['surname'].')：'.$acknowledge['message'],null,7)
-                            ));
-                        }
-                    }
+                foreach ($unknownTriggerIds as $id) {
+                    $id = strval($id);
+                    $knownTriggerIds[$id] = $id;
                 }
             }
-        }else{
-            if (!$csvExport) {
-                $events = array();
+
+            foreach ($allEventsSlice as $event) {
+                if (isset($validTriggerIds[$event['objectid']])) {
+                    $events[] = array('eventid' => $event['eventid']);
+                }
+            }
+
+            // break loop when either enough events have been retrieved, or last slice was not full
+            if (count($events) >= $config['search_limit'] || count($allEventsSlice) <= $allEventsSliceLimit) {
+                break;
+            }
+            /*
+             * Because events in slices are sorted descending by eventid (i.e. bigger eventid),
+             * first event in next slice must have eventid that is previous to last eventid in current slice.
+             */
+            $lastEvent = end($allEventsSlice);
+            $eventOptions['eventid_till'] = $lastEvent['eventid'] - 1;
+        }
+
+        /*
+         * At this point it is possible that more than $config['search_limit'] events are selected,
+         * therefore at most only first $config['search_limit'] + 1 events will be used for pagination.
+         */
+        $events = array_slice($events, 0, $config['search_limit'] + 1);
+
+        // get paging
+        $paging = getPagingLine($events);
+        $line_num=count($events);
+
+        if (!$csvExport) {
+            $csvDisabled = zbx_empty($events);
+        }
+
+        // query event with extend data
+        $events = API::Event()->get(array(
+            'source' => EVENT_SOURCE_TRIGGERS,
+            'object' => EVENT_OBJECT_TRIGGER,
+            'eventids' => zbx_objectValues($events, 'eventid'),
+            'output' => API_OUTPUT_EXTEND,
+            'select_acknowledges' => API_OUTPUT_COUNT,
+            'acknowledged'=>$filter['acknowledge'],
+            'objectids'=>$object_id,
+            'value'=>$filter['status'],
+            'sortfield' => array('clock', 'eventid'),
+            'sortorder' => ZBX_SORT_DOWN,
+            'nopermissions' => true,
+            'limit'=>$filter['limit']
+        ));
+
+        $triggers = API::Trigger()->get(array(
+            'output' => array('triggerid', 'description', 'expression', 'priority', 'flags', 'url'),
+            'selectHosts' => array('hostid', 'name', 'status'),
+            'selectItems' => array('itemid', 'hostid', 'name', 'key_', 'value_type'),
+            'triggerids' => zbx_objectValues($events, 'objectid')
+        ));
+        $triggers = zbx_toHash($triggers, 'triggerid');
+
+        // fetch hosts
+        $hosts = array();
+        foreach ($triggers as $trigger) {
+            $hosts[] = reset($trigger['hosts']);
+        }
+        $hostids = zbx_objectValues($hosts, 'hostid');
+
+        $hosts = API::Host()->get(array(
+            'output' => array('name', 'hostid', 'status'),
+            'hostids' => $hostids,
+            'selectGraphs' => API_OUTPUT_COUNT,
+            'selectScreens' => API_OUTPUT_COUNT,
+            'preservekeys' => true
+        ));
+
+        // fetch scripts for the host JS menu
+        if (!$csvExport && getRequest('hostid', 0) == 0) {
+            $scripts = API::Script()->getScriptsByHosts($hostids);
+        }
+
+        // actions
+        $actions = getEventActionsStatus(zbx_objectValues($events, 'eventid'));
+
+        // events
+        foreach ($events as $event) {
+            $trigger = $triggers[$event['objectid']];
+
+            $host = reset($trigger['hosts']);
+            $host = $hosts[$host['hostid']];
+
+            $description = CMacrosResolverHelper::resolveEventDescription(zbx_array_merge($trigger, array(
+                'clock' => $event['clock'],
+                'ns' => $event['ns']
+            )));
+
+            // duration
+            $event['duration'] = ($nextEvent = get_next_event($event, $events))
+                ? zbx_date2age($event['clock'], $nextEvent['clock'])
+                : zbx_date2age($event['clock']);
+
+            // action
+            $action = isset($actions[$event['eventid']]) ? $actions[$event['eventid']] : ' - ';
+
+            if ($csvExport) {
+                $csvRows[] = array(
+                    zbx_date2str(DATE_TIME_FORMAT_SECONDS, $event['clock']),
+                    (getRequest('hostid', 0) == 0) ? $host['name'] : null,
+                    $description,
+                    trigger_value2str($event['value']),
+                    getSeverityCaption($trigger['priority']),
+                    $event['duration'],
+                    $config['event_ack_enable'] ? ($event['acknowledges'] ? _('Yes') : _('No')) : null,
+                    strip_tags((string) $action)
+                );
+            }
+            else {
+                $triggerDescription = new CSpan($description, 'pointer link_menu');
+                $triggerDescription->setMenuPopup(
+                    CMenuPopupHelper::getTrigger($trigger, null, $event['clock'])
+                );
+
+                // acknowledge
+                $ack = getEventAckState($event,'report_event.php');
+
+                // add colors and blinking to span depending on configuration and trigger parameters
+                $statusSpan = new CSpan(trigger_value2str($event['value']));
+
+                addTriggerValueStyle(
+                    $statusSpan,
+                    $event['value'],
+                    $event['clock'],
+                    $event['acknowledged']
+                );
+
+                // host JS menu link
+                $hostName = null;
+
+                if (getRequest('hostid', 0) == 0) {
+                    $hostName = new CSpan($host['name'], 'link_menu');
+                    $hostName->setMenuPopup(CMenuPopupHelper::getHost($host, $scripts[$host['hostid']]));
+                }
+
+                $table->addRow(array(
+                    new CLink(zbx_date2str(DATE_TIME_FORMAT_SECONDS, $event['clock']),
+                        'tr_events.php?triggerid='.$event['objectid'].'&eventid='.$event['eventid'],
+                        'action'
+                    ),
+                    $hostName,
+                    $triggerDescription,
+                    $statusSpan,
+                    getSeverityCell($trigger['priority'], null, !$event['value']),
+                    $event['duration'],
+                    $config['event_ack_enable'] ? $ack : null,
+                    $action
+                ));
+                if($event['acknowledged']>0){
+                    $e= DBselect(
+                        'SELECT a.*,u.alias,u.name,u.surname'.
+                        ' FROM acknowledges a'.
+                        ' LEFT JOIN users u ON u.userid=a.userid'.
+                        ' WHERE a.eventid='.zbx_dbstr($event['eventid'])
+                    );
+                    while ($acknowledge = DBfetch($e)){
+                        $table->addRow(array(
+                            SPACE,
+                            zbx_date2str(DATE_TIME_FORMAT_SECONDS,$acknowledge['clock']),
+                            new CCol($acknowledge['alias'].'('.$acknowledge['name'].' '.$acknowledge['surname'].')：'.$acknowledge['message'],null,7)
+                        ));
+                    }
+                }
             }
         }
     }

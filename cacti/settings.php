@@ -80,11 +80,8 @@ default:
 	}
 
 	print "<td></td>\n</tr></table>\n";
-
-	//html_start_box("<strong>Cacti设置 (" . $tabs[$current_tab] . ")</strong>", "100%", $colors["header"], "3", "center", "");
-
+	
 	$form_array = array();
-
 	while (list($field_name, $field_array) = each($settings[$current_tab])) {
 		$form_array += array($field_name => $field_array);
 

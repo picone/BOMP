@@ -167,6 +167,11 @@ function thold_config_settings () {
 			'method' => 'checkbox',
 			'default' => 'on'
 			),
+		'alert_phone'=>array(
+			'friendly_name'=>'主机宕机通知手机',
+			'method'=>'textbox',
+			'max_length'=>255
+		),
 		'alert_email' => array(
 			'friendly_name' => '主机宕机通知邮件',
 			//'description' => '当主机宕机时将会发送报警邮件到该邮件地址.',
@@ -200,12 +205,19 @@ function thold_config_settings () {
 			'max_length' => 4,
 			'default' => 12
 			),
+		'thold_alert_message'=>array(
+			'friendly_name'=>'报警短信文本',
+			'method'=>'textarea',
+			'textarea_rows'=>3,
+			'textarea_cols'=>50,
+			'default'=>'主机<DESCRIPTION> (<HOSTNAME>):<SUBJECT>'
+		),
 		'thold_alert_text' => array(
 			'friendly_name' => '报警文本消息',
 			//'description' => '这个消息将显示在所有阈值报警的顶部(最多255个字符). 允许HTML,但当设置为以文本方式发送邮件时无效.以下描述符可用.<br>&#060DESCRIPTION&#062 &#060HOSTNAME&#062 &#060TIME&#062 &#060URL&#062 &#060GRAPHID&#062 &#060CURRENTVALUE&#062 &#060THRESHOLDNAME&#062  &#060DSNAME&#062 &#060SUBJECT&#062 &#060GRAPH&#062',
 			'method' => 'textarea',
 			'textarea_rows' => '5',
-			'textarea_cols' => '80',
+			'textarea_cols' => '50',
 			'default' => '<html><body>请注意,已产生一个新报警. <br><br><strong>主机</strong>: <DESCRIPTION> (<HOSTNAME>)<br><strong>URL</strong>: <URL><br><strong>消息</strong>: <SUBJECT><br><br><GRAPH></body></html>',
 			),
 		'thold_baseline_header' => array(
