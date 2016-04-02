@@ -176,18 +176,6 @@ if ($csvExport) {
 }
 else {
     if ($source == EVENT_SOURCE_TRIGGERS) {
-        $pageFilter = new CPageFilter(array(
-            'groups' => array(
-                'monitored_hosts' => true,
-                'with_monitored_triggers' => true
-            ),
-            'hosts' => array(
-                'monitored_hosts' => true,
-                'with_monitored_triggers' => true
-            ),
-            'hostid' => getRequest('hostid'),
-            'groupid' => getRequest('groupid')
-        ));
 
         // try to find matching trigger when host is changed
         // use the host ID from the page filter since it may not be present in the request
@@ -290,15 +278,6 @@ else {
             if (getRequest('triggerid') != 0) {
                 $headerForm->addVar('triggerid', getRequest('triggerid'), 'triggerid_filter');
             }
-
-            $headerForm->addItem(array(
-                _('Group').SPACE,
-                $pageFilter->getGroupsCB()
-            ));
-            $headerForm->addItem(array(
-                SPACE._('Host').SPACE,
-                $pageFilter->getHostsCB()
-            ));
         }
 
         if ($allow_discovery) {

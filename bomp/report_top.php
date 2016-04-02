@@ -118,7 +118,7 @@ if(!hasRequest('linkman')){
                     )
                 ))
             ),
-            new CCol(bold('筛选数量:')),
+            new CCol(bold('筛选数量(建议不超过20):')),
             new CCol(new CTextBox('limit',$filter['limit'],40))
         )
     );
@@ -196,8 +196,8 @@ JOIN hosts USING (hostid) JOIN hosts_groups USING (hostid) WHERE groupid IN ('.i
         '时间',
         '磁盘占用'
     ));
-    $items=DBfetchArray(DBselect('SELECT host,history.hostid,history.itemid,history.name,value,clock,key_ FROM (
-SELECT itemid,items.name,hostid,TRUNCATE(SUM(cache_history_uint.value)/disk_total.value*100,2) AS value,cache_history_uint.clock,key_ FROM cache_history_uint JOIN items USING (itemid) JOIN (SELECT hostid,SUM(value) AS value FROM cache_history_uint JOIN items USING (itemid) WHERE key_ LIKE \'vfs.fs.size[%,total]\' GROUP BY hostid) AS disk_total USING (hostid) WHERE key_ LIKE \'vfs.fs.size[%,free]\' GROUP BY hostid
+    $items=DBfetchArray(DBselect('SELECT host,history.hostid,history.itemid,value,clock FROM (
+SELECT itemid,hostid,TRUNCATE(SUM(cache_history_uint.value)/disk_total.value*100,2) AS value,cache_history_uint.clock FROM cache_history_uint JOIN items USING (itemid) JOIN (SELECT hostid,SUM(value) AS value FROM cache_history_uint JOIN items USING (itemid) WHERE key_ LIKE \'vfs.fs.size[%,total]\' GROUP BY hostid) AS disk_total USING (hostid) WHERE key_ LIKE \'vfs.fs.size[%,free]\' GROUP BY hostid
 ) AS history JOIN hosts USING (hostid) JOIN hosts_groups USING (hostid) WHERE groupid IN ('.implode(',',$filter['groupids']).') ORDER BY value DESC LIMIT '.$filter['limit']));
     foreach($items as $key=>&$val){
         $DiskTable->addRow(array(
