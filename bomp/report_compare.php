@@ -223,7 +223,7 @@ if(hasRequest('report_show')||hasRequest('linkman')) {
     </h1>
     <form method="post" target="_blank">
         <input type="hidden" name="print" value="1">
-        <input type="hidden" name="picture_src" value="<?php echo $src;?>">
+        <input type="hidden" name="picture_src" value="<?php if(isset($src)){echo $src;}?>">
         <table class="table">
             <thead>
             <tr>
@@ -247,10 +247,10 @@ if(hasRequest('report_show')||hasRequest('linkman')) {
                 <td colspan="5">
                     <table>
                         <tr>
-                            <td style="background-color:#AAFFAA"><input type="radio" name="description" id="strong" value="1"<?php if(getRequest('description')==1||!hasRequest('description')){echo 'checked';}?>><label for="strong">健壮</label></td>
-                            <td style="background-color:#DBDBDB"><input type="radio" name="description" id="increase" value="2"<?php if(getRequest('description')==2){echo 'checked';}?>><label for="increase">待提高</label></td>
-                            <td style="background-color:#FFF6A5"><input type="radio" name="description" id="unhealthy" value="3"<?php if(getRequest('description')==3){echo 'checked';}?>><label for="unhealthy">不健康</label></td>
-                            <td style="background-color:#FF3838"><input type="radio" name="description" id="serious" value="4"<?php if(getRequest('description')==4){echo 'checked';}?>><label for="serious">严重问题</label></td>
+                            <td data-role="color" data-class="report-strong"><input type="checkbox" name="description" id="strong" value="1"<?php if(getRequest('description')==1||!hasRequest('description')){echo 'checked';}?>><label for="strong">健壮</label></td>
+                            <td data-role="color" data-class="report-increase"><input type="checkbox" name="description" id="increase" value="2"<?php if(getRequest('description')==2){echo 'checked';}?>><label for="increase">待提高</label></td>
+                            <td data-role="color" data-class="report-unhealthy"><input type="checkbox" name="description" id="unhealthy" value="3"<?php if(getRequest('description')==3){echo 'checked';}?>><label for="unhealthy">不健康</label></td>
+                            <td data-role="color" data-class="report-serious"><input type="checkbox" name="description" id="serious" value="4"<?php if(getRequest('description')==4){echo 'checked';}?>><label for="serious">严重问题</label></td>
                         </tr>
                     </table>
                 </td>

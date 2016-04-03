@@ -50,3 +50,15 @@ body{
     line-height: normal;
     text-align:left;
 }
+.report-strong{
+    background-color:#AAFFAA
+}
+.report-increase{
+    background-color:#DBDBDB
+}
+.report-unhealthy{
+    background-color:#FFF6A5
+}
+.report-serious{
+    background-color:#FF3838
+}
