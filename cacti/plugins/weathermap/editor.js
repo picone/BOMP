@@ -105,6 +105,7 @@ function attach_click_events()
 
     jQuery("#tb_addlink").click(add_link);
     jQuery("#tb_poslegend").click(position_first_legend);
+    jQuery("#tb_status").click(status_add);
     jQuery("#tb_postime").click(position_timestamp);
     jQuery("#tb_colours").click(manage_colours);
 
@@ -449,6 +450,12 @@ function position_first_legend()
     real_position_legend('DEFAULT');
 }
 
+function status_add(){
+    document.getElementById('tb_help').innerText='请在图上点击您要放置的位置';
+    document.getElementById('action').value ='place_status';
+    mapmode('xy');
+}
+
 // called from clicking on the existing legends
 function position_legend(e)
     {
@@ -556,6 +563,7 @@ function show_node(name)
         document.frmMain.node_label.value = mynode.label;
         document.frmMain.node_infourl.value = mynode.infourl;
         document.frmMain.node_hover.value = mynode.overliburl;
+        document.frmMain.host_id.value = mynode.host_id;
         
         if(mynode.iconfile != '')
         {

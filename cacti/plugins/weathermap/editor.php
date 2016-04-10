@@ -358,6 +358,15 @@ else
 		
 		$map->nodes[$new_node_name]->x = intval($_REQUEST['node_x']);
 		$map->nodes[$new_node_name]->y = intval($_REQUEST['node_y']);
+		
+		//监控的主机ID
+		if(intval($_REQUEST['host_id'])>0){
+			$map->nodes[$new_node_name]->usescale='cactiupdown';
+			$map->nodes[$new_node_name]->targets[0][4]='cactihost:'.intval($_REQUEST['host_id']);
+		}else{
+			$map->nodes[$new_node_name]->usescale='none';
+			unset($map->nodes[$new_node_name]->targets[0]);
+		}
 
 		if($_REQUEST['node_iconfilename'] == '--NONE--')
 		{
@@ -570,7 +579,20 @@ else
 
 		$map->WriteConfig($mapfile);
 		break;
-
+	case 'place_status':
+		$map->ReadConfig($mapfile);
+		$map->colours['cactiupdown']=array(
+			array('bottom'=>0,'top'=>0.5,'red1'=>192,'green1'=>192,'blue1'=>192,'tag'=>'Disabled'),
+			array('bottom'=>0.5,'top'=>1.5,'red1'=>255,'green1'=>0,'blue1'=>0,'tag'=>'Down'),
+			array('bottom'=>1.5,'top'=>2.5,'red1'=>0,'green1'=>0,'blue1'=>255,'tag'=>'Recovering'),
+			array('bottom'=>2.5,'top'=>3.5,'red1'=>0,'green1'=>255,'blue1'=>0,'tag'=>'Up')
+		);
+		$map->keyx['cactiupdown']=snap(intval($_REQUEST['x']),$grid_snap_value);
+		$map->keyy['cactiupdown']=snap(intval($_REQUEST['y']),$grid_snap_value);
+		$map->keytext['cactiupdown']='主机状态图例';
+		$map->keystyle['cactiupdown']='tags';
+		$map->WriteConfig($mapfile);
+		break;
 	case "place_stamp":
 		$x = snap( intval($_REQUEST['x']), $grid_snap_value);
 		$y = snap( intval($_REQUEST['y']), $grid_snap_value);
@@ -939,12 +961,13 @@ else
           <li class="tb_active" id="tb_newfile">更改<br />文件</li>
 	  <li class="tb_active" id="tb_addnode">添加<br />节点</li>
 	  <li class="tb_active" id="tb_addlink">添加<br />连接</li>
-	  <li class="tb_active" id="tb_poslegend">图例<br />位置</li>
+	  <li class="tb_active" id="tb_poslegend">流量<br />图例</li>
+	  <li class="tb_active" id="tb_status">状态<br/>图例</li>
 	  <li class="tb_active" id="tb_postime">时间<br />位置</li>
 	  <li class="tb_active" id="tb_mapprops">流量图<br />属性</li>
 	  <li class="tb_active" id="tb_mapstyle">流量图<br />样式</li>
-	  <li class="tb_active" id="tb_colours">管理<br />颜色</li>
-	  <li class="tb_active" id="tb_manageimages">管理<br />图片</li>
+	  <!--<li class="tb_active" id="tb_colours">管理<br />颜色</li>
+	  <li class="tb_active" id="tb_manageimages">管理<br />图片</li>-->
 	  <li class="tb_active" id="tb_prefs">编辑器<br />设置</li>
           <li class="tb_coords" id="tb_coords">位置<br />---, ---</li>
 	  <li class="tb_help"><span id="tb_help">您可以点击一个节点或连接编辑它们的属性</span></li>
@@ -1037,6 +1060,10 @@ else
 	}
 ?>
 		</select></td>
+		  </tr>
+		  <tr>
+			  <th><label for="host_id">显示状态的设备编号</label></th>
+			  <td><input name="host_id" id="host_id"></td>
 		  </tr>
 		  <tr>
 			<th></th>

@@ -1210,10 +1210,10 @@ function host() {
 	<html>
 	<head>
                         <title>控制台 -> 数据源</title>
-                        <link href="/axlchen/cacti/include/main.css" type="text/css" rel="stylesheet">
-                        <link href="/axlchen/cacti/images/favicon.ico" rel="shortcut icon">
+                        <link href="/cacti/include/main.css" type="text/css" rel="stylesheet">
+                        <link href="/cacti/images/favicon.ico" rel="shortcut icon">
                         <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-                        <script type="text/javascript" src="/axlchen/cacti/include/layout.js"></script>
+                        <script type="text/javascript" src="/cacti/include/layout.js"></script>
                        </head>
                             <body >
                             <table width="100%" cellspacing="0" cellpadding="0">

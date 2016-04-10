@@ -838,7 +838,7 @@ class WeatherMapNode extends WeatherMapItem
 					}
 					else
 					{
-						$output.=' "' . $target[4].'"'; 
+						$output.=' "' . $target[4].'"';
 					}
 				}
 				
@@ -944,6 +944,14 @@ class WeatherMapNode extends WeatherMapItem
 		$js.="overliburl:" . js_escape(join(" ",$this->overliburl[IN])) . ", ";
 		$js.="overlibwidth:" . $this->overlibheight . ", ";
 		$js.="overlibheight:" . $this->overlibwidth . ", ";
+		$host_id='\'\'';
+		foreach($this->targets as $target){
+			if(strpos($target[4],'cactihost:')!==FALSE){
+				$host_id=substr($target[4],10);
+				break;
+			}
+		}
+		$js.="host_id:" . $host_id . ", ";
 		if(preg_match("/^(none|nink|inpie|outpie|box|rbox|gauge|round)$/",$this->iconfile))
 		{
 			$js.="iconfile:" . js_escape("::".$this->iconfile);
