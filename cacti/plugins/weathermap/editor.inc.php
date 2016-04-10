@@ -155,7 +155,7 @@ function show_editor_startpage()
 			$title = $titles[$file];
 			$note = $notes[$file];
 			$nicefile = htmlspecialchars($file);
-			print "<li>$note<a href=\"?mapname=$nicefile&plug=$fromplug\">$nicefile</a> - <span class=\"comment\">$title</span> - <a href=\"?action=delete_map&mapname=$nicefile\" class=\"comment\">(删除)</a></li>\n";
+			print "<li>$note<a href=\"?mapname=$nicefile&plug=$fromplug\">$nicefile</a> - <span class=\"comment\">$title</span> - <a href=\"javascript:weathermap_delete('${nicefile}')\" class=\"comment\">(删除)</a></li>\n";
 		}
 	} else {
 		print '<li>'.$errorstring.'</li>';
@@ -169,6 +169,15 @@ function show_editor_startpage()
 */
 	print "</div>"; // dlgStart
 	print "</div>"; // withjs
+	?>
+	<script type="text/javascript">
+		function weathermap_delete(name){
+			if(confirm('您确认删除流量图'+name+'?')){
+				window.location='?action=delete_map&mapname='+name;
+			}
+		}
+	</script>
+	<?php
 	print "</body></html>";
 }
 
