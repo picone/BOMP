@@ -278,5 +278,15 @@ function thold_config_settings () {
 			'method' => 'textbox',
 			'max_length' => 255,
 			),
-		);
+		'throld_phone_header'=>array(
+			'friendly_name'=>'短信通知选项',
+			'method'=>'spacer'
+		),
+		'thold_phone_path'=>array(
+			'friendly_name'=>'脚本路径',
+			'description'=>'用来发送短信的脚本路径',
+			'method'=>'textbox',
+			'max_length'=>255
+		)
+	);
 }

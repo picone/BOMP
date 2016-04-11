@@ -481,6 +481,7 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 	$thold_show_datasource = read_config_option('thold_show_datasource');
 	$thold_send_text_only = read_config_option('thold_send_text_only');
 	$thold_alert_text = read_config_option('thold_alert_text');
+	$thold_sms_text=read_config_option('thold_alert_message');
 
 	// Remove this after adding an option for it
 	$thold_show_datasource = true;
@@ -491,6 +492,10 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 	// Make sure the alert text has been set
 	if (!isset($thold_alert_text) || $thold_alert_text == '') {
 		$thold_alert_text = "<html><body>请注意,已产生一个新的报警.<br><br><strong>主机</strong>: <DESCRIPTION> (<HOSTNAME>)<br><strong>URL</strong>: <URL><br><strong>消息</strong>: <SUBJECT><br><br><GRAPH></body></html>";
+	}
+
+	if(!isset($thold_sms_text)||$thold_sms_text==''){
+		$thold_sms_text='主机:<DESCRIPTION>(<HOSTNAME>)产生一个消息:<SUBJECT>';
 	}
 
 	$hostname = db_fetch_row('SELECT description, hostname from host WHERE id = ' . $item['host_id']);
@@ -528,6 +533,11 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 	$thold_alert_text = str_replace('<DATE_RFC822>', date(DATE_RFC822), $thold_alert_text);
 	$thold_alert_text = str_replace('<DEVICENOTE>', $h['notes'], $thold_alert_text);
 
+	$thold_sms_text=strtr($thold_sms_text,array(
+		'<DESCRIPTION>'=>$hostname['description'],
+		'<HOSTNAME>'=>$hostname['hostname']
+	));
+
 	$msg = $thold_alert_text;
 
 	if ($thold_send_text_only == 'on') {
@@ -557,6 +567,7 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 					}
 					if (trim($alert_emails) != '') {
 						thold_mail($alert_emails, '', $subject, $msg, $file_array);
+						thold_sms($subject,$thold_sms_text);
 					}
 				}
 
@@ -584,6 +595,7 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 						$subject = $desc . ($thold_show_datasource ? " [$name]" : '') . " 已恢复到正常值: $currentval";
 						if (trim($alert_emails) != '' && $item['restored_alert'] != 'on')
 							thold_mail($alert_emails, '', $subject, $msg, $file_array);
+							thold_sms($subject,$thold_sms_text);
 						thold_log(array(
 							'type' => 0,
 							'time' => time(),
@@ -621,6 +633,7 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 						$subject = $desc . ($thold_show_datasource ? " [$name]" : '') . " 已恢复到正常值: $currentval";
 						if (trim($alert_emails) != '')
 							thold_mail($alert_emails, '', $subject, $msg, $file_array);
+							thold_sms($subject,$thold_sms_text);
 					}
 					$item['bl_fail_count'] = 0;
 					break;
@@ -638,6 +651,7 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 						$subject = $desc . ($thold_show_datasource ? " [$name]" : '') . ' ' . ($ra ? 'is still' : 'went') . ' ' . ($item['bl_alert'] == 2 ? 'above' : 'below') . " calculated baseline threshold with $currentval";
 						if (trim($alert_emails) != '')
 							thold_mail($alert_emails, '', $subject, $msg, $file_array);
+							thold_sms($subject,$thold_sms_text);
 					}
 					break;
 			}
@@ -684,6 +698,7 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 					}
 					if (trim($alert_emails) != '')
 						thold_mail($alert_emails, '', $subject, $msg, $file_array);
+						thold_sms($subject,$thold_sms_text);
 				}
 				thold_log(array(
 					'type' => 2,
@@ -1351,6 +1366,9 @@ function thold_mail($to, $from, $subject, $message, $filename, $headers = '') {
 	global $config;
 	include_once($config['base_path'] . '/plugins/settings/include/mailer.php');
 	include_once($config['base_path'] . '/plugins/thold/setup.php');
+	//发送短信
+	thold_sms($subject,$message);
+	//
 	$subject = iconv("UTF-8", "GB2312//IGNORE", $subject);
 	$subject = trim($subject);
 	$message = iconv("UTF-8", "GB2312//IGNORE", $message);
@@ -1471,6 +1489,20 @@ function thold_mail($to, $from, $subject, $message, $filename, $headers = '') {
 	}
 
 	return '';
+}
+
+function thold_sms($subject,$message){
+	$phones=read_config_option('alert_phone');
+	if($phones!=''){
+		$phones=explode(',',$phones);
+		$path=read_config_option('thold_phone_path');
+		$message=trim(str_replace('<SUBJECT>',$subject,$message));
+		foreach($phones as $phone){
+			if(strlen($phone)==11){
+				exec($path.' '.$phone.' \''.$message.'\'');
+			}
+		}
+	}
 }
 
 function thold_template_update_threshold ($id, $template) {
