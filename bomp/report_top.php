@@ -29,7 +29,7 @@ if (hasRequest('filter_set')) {
 }
 $filter=array(
     'groupids' => CProfile::getArray('web.top.filter.groupids'),
-    'limit' => CProfile::get('web.top.limit',10)
+    'limit' => CProfile::get('web.top.filter.limit',10)
 );
 $multiSelectHostGroupData = array();
 if ($filter['groupids'] !== null) {
