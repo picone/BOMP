@@ -752,11 +752,9 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 		if (is_writable($filename)) {
 			if (!$handle = fopen($filename, 'a')) {
 				echo "无法打开文件 ($filename)";
-				continue;
 			}
 		} else {
 			echo "日志文件 $filename 不可写";
-			continue;
 		}
 		$logdate = date('m-d-y.H:i:s');
 		$logout = "$logdate element: $desc alertstat: $alertstat graph_id: $graph_id thold_low: " . $item['thold_low'] . ' thold_hi: ' . $item['thold_hi'] . " rra: $rra trigger: " . $trigger . ' triggerct: ' . $item['thold_fail_count'] . " current: $currentval logset: $logset";

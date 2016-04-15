@@ -496,20 +496,20 @@ function grow_dhtml_trees() {
 
 	?>
 	<script type="text/javascript">
-	<!--
-	USETEXTLINKS = 1
-	STARTALLOPEN = 0
-	USEFRAMES = 0
-	USEICONS = 0
-	WRAPTEXT = 1
-	PERSERVESTATE = 1
-	HIGHLIGHT = 1
+	USETEXTLINKS = 1;
+	STARTALLOPEN = 0;
+	USEFRAMES = 0;
+	USEICONS = 0;
+	WRAPTEXT = 1;
+	PERSERVESTATE = 1;
+	HIGHLIGHT = 1;
 	<?php
-	/* get current time */
+	/* get current time *//*
 	list($micro,$seconds) = split(" ", microtime());
 	$current_time = $seconds + $micro;
-	$expand_hosts = read_graph_config_option("expand_hosts");
+	$expand_hosts = read_graph_config_option("expand_hosts");*/
 
+	$dhtml_tree = create_dhtml_tree();/*
 	if (!isset($_SESSION['dhtml_tree'])) {
 		$dhtml_tree = create_dhtml_tree();
 		$_SESSION['dhtml_tree'] = $dhtml_tree;
@@ -521,7 +521,7 @@ function grow_dhtml_trees() {
 		}else{
 			$dhtml_tree = $_SESSION['dhtml_tree'];
 		}
-	}
+	}*/
 
 	$total_tree_items = sizeof($dhtml_tree) - 1;
 
@@ -529,7 +529,6 @@ function grow_dhtml_trees() {
 		print $dhtml_tree[$i];
 	}
 	?>
-	//-->
 	</script>
 	<?php
 }
@@ -568,13 +567,15 @@ function create_dhtml_tree() {
 	if (sizeof($tree_list) > 0) {
 		foreach ($tree_list as $tree) {
 			$i++;
+
 			$hierarchy = db_fetch_assoc("select
 				graph_tree_items.id,
 				graph_tree_items.title,
 				graph_tree_items.order_key,
 				graph_tree_items.host_id,
 				graph_tree_items.host_grouping_type,
-				host.description as hostname
+				host.description as hostname,
+				status
 				from graph_tree_items
 				left join host on (host.id=graph_tree_items.host_id)
 				$sql_join
@@ -583,7 +584,9 @@ function create_dhtml_tree() {
 				and graph_tree_items.local_graph_id = 0
 				order by graph_tree_items.order_key");
 
-			$dhtml_tree[$i] = "ou0 = insFld(foldersTree, gFld(\"" . htmlspecialchars($tree["name"]) . "\", \"" . htmlspecialchars("graph_view.php?action=tree&tree_id=" . $tree["id"]) . "\"))\n";
+			//$dhtml_tree[$i] = "ou0 = insFld(foldersTree, gFld(\"" . htmlspecialchars($tree["name"]) . "\", \"" . htmlspecialchars("graph_view.php?action=tree&tree_id=" . $tree["id"]) . "\"))\n";
+			$tree_index=$i;
+			$down_count=0;
 			$i++;
 			$dhtml_tree[$i] = "ou0.xID = \"tree_" . $tree["id"] . "\"\n";
 
@@ -593,7 +596,12 @@ function create_dhtml_tree() {
 					$tier = tree_tier($leaf["order_key"]);
 
 					if ($leaf["host_id"] > 0) {
-						$dhtml_tree[$i] = "ou" . ($tier) . " = insFld(ou" . abs(($tier-1)) . ", gFld(\"" . "主机: " . htmlspecialchars($leaf["hostname"]) . "\", \"" . htmlspecialchars("graph_view.php?action=tree&tree_id=" . $tree["id"] . "&leaf_id=" . $leaf["id"]) . "\"))\n";
+						$leaf['hostname']=htmlspecialchars($leaf['hostname']);
+						if($leaf['status']==1){
+							$down_count++;
+							$leaf['hostname']='<span style=\'color:red;\'>'.$leaf['hostname'].'</span>';
+						}
+						$dhtml_tree[$i] = "ou" . ($tier) . " = insFld(ou" . abs(($tier-1)) . ", gFld(\"" . "主机:" . $leaf["hostname"] . "\", \"" . htmlspecialchars("graph_view.php?action=tree&tree_id=" . $tree["id"] . "&leaf_id=" . $leaf["id"]) . "\"))\n";
 						$i++;
 						$dhtml_tree[$i] = "ou" . ($tier) . ".xID = \"tree_" . $tree["id"] . "_leaf_" . $leaf["id"] . "\"\n";
 
@@ -669,6 +677,7 @@ function create_dhtml_tree() {
 					}
 				}
 			}
+			$dhtml_tree[$tree_index] = "ou0 = insFld(foldersTree, gFld(\"" . htmlspecialchars($tree["name"]) . "($down_count)\", \"" . htmlspecialchars("graph_view.php?action=tree&tree_id=" . $tree["id"]) . "\"))\n";
 		}
 	}
 
