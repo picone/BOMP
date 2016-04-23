@@ -153,7 +153,6 @@ function monitor_device_action_prepare($save) {
 }
 
 function monitor_device_action_array($device_action_array) {
-	$device_action_array['monitor_enable'] = '启用监视';
 	$device_action_array['monitor_disable'] = '禁用监视';
 	return $device_action_array;
 }
@@ -272,14 +271,6 @@ function monitor_config_form () {
 	foreach ($fields_host_edit2 as $f => $a) {
 		$fields_host_edit3[$f] = $a;
 		if ($f == 'disabled') {
-			$fields_host_edit3['monitor'] = array(
-				'method' => 'checkbox',
-				'friendly_name' => '监视主机',
-				//'description' => '选项该选项在监视页面上监视该主机..',
-				'value' => '|arg1:monitor|',
-				'default' => '',
-				'form_id' => false
-			);
 			$fields_host_edit3['monitor_text'] = array(
 				'friendly_name' => '主机宕机消息',
 				//'description' => '当主机宕机时将会显示该消息,您可以在这里输入该机主的相关信息,如联系人,联系方式等.',

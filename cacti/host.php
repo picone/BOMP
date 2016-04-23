@@ -665,27 +665,6 @@ function host_edit() {
 	if (!empty($_GET["host_template_id"])) {
 		$fields_host_edit["host_template_id"]["value"] = $_GET["host_template_id"];
 	}
-	
-	// $fields_host_edit["monitor"]=array( 
-		// "method"=> "checkbox" ,
-		// "friendly_name" => "监视主机 ",
-		// //"description" => "选项该选项在监视页面上监视该主机.. ",
-		// "value"=> "|arg1:monitor|",
-		// "form_id" =>"",
-		// default =>		
-	// );
-	// $fields_host_edit["monitor_text"]=array( 
-		// "friendly_name" => "主机宕机消息",
-		// //"description" => "当主机宕机时将会显示该消息,您可以在这里输入该机主的相关信息,如联系人,联系方式等. ",
-		// "method" => "textarea" ,
-		// "max_length" => 1000 ,
-		// "textarea_rows" => 3 ,
-		// "textarea_cols"=> 30
-		// "value" => "|arg1:monitor_text| ",
-		// default => 
-	// );
-	//print_r($fields_host_edit);
-	//exit;
 	draw_edit_form(array(
 		"config" => array("form_name" => "chk"),
 		"fields" => inject_form_variables($fields_host_edit, (isset($host) ? $host : array()))

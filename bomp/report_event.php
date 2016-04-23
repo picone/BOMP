@@ -327,56 +327,6 @@ else {
                 new CCol('显示行数','form_row_c'),
                 new CCol(new CTextBox('limit',$filter['limit'],50))
             )));
-            //状态
-            $statusComboBox=new CComboBox('status',getRequest('status'));
-            $statusComboBox->addItem(-1,_('All'));
-            $statusComboBox->addItem(0,_('Normal'));
-            $statusComboBox->addItem(1,_('Problem'));
-            $filterForm->addRow(new CRow(array(
-                new CCOl(_('Status'),'form_row_c'),
-                new CCol($statusComboBox)
-            )));
-            //严重性
-            $priorityComboBox=new CComboBox('priority',$filter['priority']);
-            $data=getSeverityCaption();
-            foreach($data as $key=>&$val){
-                $priorityComboBox->addItem($key,_($val));
-            }
-            $filterForm->addRow(new CRow(array(
-                new CCOl(_('Severity'),'form_row_c'),
-                new CCol($priorityComboBox)
-            )));
-            //知悉
-            $ackComboBox=new CComboBox('acknowledge',getRequest('acknowledge'));
-            $ackComboBox->addItem(-1,_('All'));
-            $ackComboBox->addItem(0,'未知悉');
-            $ackComboBox->addItem(1,_('Acknowledged'));
-            $filterForm->addRow(new CRow(array(
-                new CCOl(_('Acknowledges'),'form_row_c'),
-                new CCol($ackComboBox)
-            )));
-            //触发器
-            $filterForm->addRow(new CRow(array(
-                new CCol(_('Trigger'), 'form_row_c'),
-                new CCol(array(
-                    new CTextBox('trigger', $trigger,50,true),
-                    new CButton('btn1', _('Select'),
-                        'return PopUp("popup.php?'.
-                        'dstfrm='.$filterForm->getName().
-                        '&dstfld1=triggerid'.
-                        '&dstfld2=trigger'.
-                        '&srctbl=triggers'.
-                        '&srcfld1=triggerid'.
-                        '&srcfld2=description'.
-                        '&real_hosts=1'.
-                        '&monitored_hosts=1'.
-                        '&with_monitored_triggers=1'.
-                        //($pageFilter->hostid ? '&only_hostid='.$pageFilter->hostid : '').
-                        '");',
-                        'T'
-                    )
-                ), 'form_row_r')
-            )));
             //群组
             $multiSelectHostGroupData=array();
             if ($filter['groupids']!==null){
@@ -433,7 +383,56 @@ else {
                     )
                 )))
             )));
-            
+            //触发器
+            $filterForm->addRow(new CRow(array(
+                new CCol(_('Trigger'), 'form_row_c'),
+                new CCol(array(
+                    new CTextBox('trigger', $trigger,50,true),
+                    new CButton('btn1', _('Select'),
+                        'return PopUp("popup.php?'.
+                        'dstfrm='.$filterForm->getName().
+                        '&dstfld1=triggerid'.
+                        '&dstfld2=trigger'.
+                        '&srctbl=triggers'.
+                        '&srcfld1=triggerid'.
+                        '&srcfld2=description'.
+                        '&real_hosts=1'.
+                        '&monitored_hosts=1'.
+                        '&with_monitored_triggers=1'.
+                        //($pageFilter->hostid ? '&only_hostid='.$pageFilter->hostid : '').
+                        '");',
+                        'T'
+                    )
+                ), 'form_row_r')
+            )));
+            //状态
+            $statusComboBox=new CComboBox('status',getRequest('status'));
+            $statusComboBox->addItem(-1,_('All'));
+            $statusComboBox->addItem(0,_('Normal'));
+            $statusComboBox->addItem(1,_('Problem'));
+            $filterForm->addRow(new CRow(array(
+                new CCOl(_('Status'),'form_row_c'),
+                new CCol($statusComboBox)
+            )));
+            //严重性
+            $priorityComboBox=new CComboBox('priority',$filter['priority']);
+            $data=getSeverityCaption();
+            foreach($data as $key=>&$val){
+                $priorityComboBox->addItem($key,_($val));
+            }
+            $filterForm->addRow(new CRow(array(
+                new CCOl(_('Severity'),'form_row_c'),
+                new CCol($priorityComboBox)
+            )));
+            //知悉
+            $ackComboBox=new CComboBox('acknowledge',getRequest('acknowledge'));
+            $ackComboBox->addItem(-1,_('All'));
+            $ackComboBox->addItem(0,'未知悉');
+            $ackComboBox->addItem(1,_('Acknowledged'));
+            $filterForm->addRow(new CRow(array(
+                new CCOl(_('Acknowledges'),'form_row_c'),
+                new CCol($ackComboBox)
+            )));
             $filterForm->addItemToBottomRow(new CSubmit('filter_set', _('Filter')));
             $filterForm->addItemToBottomRow(new CSubmit('filter_rst', _('Reset')));
         }
