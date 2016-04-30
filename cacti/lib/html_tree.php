@@ -496,39 +496,34 @@ function grow_dhtml_trees() {
 
 	?>
 	<script type="text/javascript">
-	USETEXTLINKS = 1;
-	STARTALLOPEN = 0;
-	USEFRAMES = 0;
-	USEICONS = 0;
-	WRAPTEXT = 1;
-	PERSERVESTATE = 1;
-	HIGHLIGHT = 1;
-	<?php
-	/* get current time *//*
-	list($micro,$seconds) = split(" ", microtime());
-	$current_time = $seconds + $micro;
-	$expand_hosts = read_graph_config_option("expand_hosts");*/
-
-	$dhtml_tree = create_dhtml_tree();/*
-	if (!isset($_SESSION['dhtml_tree'])) {
-		$dhtml_tree = create_dhtml_tree();
-		$_SESSION['dhtml_tree'] = $dhtml_tree;
-	}else{
-		$dhtml_tree = $_SESSION['dhtml_tree'];
-		if (($dhtml_tree[0] + read_graph_config_option("page_refresh") < $current_time) || ($expand_hosts != $dhtml_tree[1])) {
+		USETEXTLINKS=1;
+		STARTALLOPEN=0;
+		USEFRAMES=0;
+		USEICONS=0;
+		WRAPTEXT=1;
+		PERSERVESTATE=1;
+		HIGHLIGHT=1;
+		<?php
 			$dhtml_tree = create_dhtml_tree();
-			$_SESSION['dhtml_tree'] = $dhtml_tree;
-		}else{
-			$dhtml_tree = $_SESSION['dhtml_tree'];
+			$total_tree_items = sizeof($dhtml_tree) - 1;
+			for ($i = 2; $i <= $total_tree_items; $i++) {
+				print $dhtml_tree[$i];
+			}
+		?>
+		var i;
+		function node_visit(node){
+			if(node){
+				if(node.nChildren>0){
+					for(var j=0;j<node.children.length;j++){
+						node_visit(node.children[j]);
+					}
+				}
+				if(node.desc.indexOf('<span style="color:red;">')>=0){
+					node.parentObj.desc='<span style="color:red;">'+node.parentObj.desc+'</span>';
+				}
+			}
 		}
-	}*/
-
-	$total_tree_items = sizeof($dhtml_tree) - 1;
-
-	for ($i = 2; $i <= $total_tree_items; $i++) {
-		print $dhtml_tree[$i];
-	}
-	?>
+		node_visit(foldersTree);
 	</script>
 	<?php
 }
@@ -599,9 +594,9 @@ function create_dhtml_tree() {
 						$leaf['hostname']=htmlspecialchars($leaf['hostname']);
 						if($leaf['status']==1){
 							$down_count++;
-							$leaf['hostname']='<span style=\'color:red;\'>'.$leaf['hostname'].'</span>';
+							$leaf['hostname']='<span style="color:red;">主机:'.$leaf['hostname'].'</span>';
 						}
-						$dhtml_tree[$i] = "ou" . ($tier) . " = insFld(ou" . abs(($tier-1)) . ", gFld(\"" . "主机:" . $leaf["hostname"] . "\", \"" . htmlspecialchars("graph_view.php?action=tree&tree_id=" . $tree["id"] . "&leaf_id=" . $leaf["id"]) . "\"))\n";
+						$dhtml_tree[$i] = "ou" . ($tier) . " = insFld(ou" . abs(($tier-1)) . ", gFld('".$leaf["hostname"] . "','" . htmlspecialchars("graph_view.php?action=tree&tree_id=" . $tree["id"] . "&leaf_id=" . $leaf["id"]) . "'))\n";
 						$i++;
 						$dhtml_tree[$i] = "ou" . ($tier) . ".xID = \"tree_" . $tree["id"] . "_leaf_" . $leaf["id"] . "\"\n";
 
@@ -620,7 +615,7 @@ function create_dhtml_tree() {
 								if (sizeof($graph_templates) > 0) {
 									foreach ($graph_templates as $graph_template) {
 										$i++;
-										$dhtml_tree[$i] = "ou" . ($tier+1) . " = insFld(ou" . ($tier) . ", gFld(\" " . htmlspecialchars($graph_template["name"]) . "\", \"graph_view.php?action=tree&tree_id=" . $tree["id"] . "&leaf_id=" . $leaf["id"] . "&host_group_data=graph_template:" . $graph_template["id"] . "\"))\n";
+										$dhtml_tree[$i] = "ou" . ($tier+1) . " = insFld(ou" . ($tier) . ", gFld('".htmlspecialchars($graph_template["name"]) . "', 'graph_view.php?action=tree&tree_id=" . $tree["id"] . "&leaf_id=" . $leaf["id"] . "&host_group_data=graph_template:" . $graph_template["id"] . "'))\n";
 										$i++;
 										$dhtml_tree[$i] = "ou" . ($tier+1) . ".xID = \"tree_" . $tree["id"] . "_leaf_" . $leaf["id"] . "_hgd_gt_" . $graph_template["id"] . "\"\n";
 									}
@@ -671,13 +666,13 @@ function create_dhtml_tree() {
 							}
 						}
 					}else{
-						$dhtml_tree[$i] = "ou" . ($tier) . " = insFld(ou" . abs(($tier-1)) . ", gFld(\"" . htmlspecialchars($leaf["title"]) . "\", \"" . htmlspecialchars("graph_view.php?action=tree&tree_id=" . $tree["id"] . "&leaf_id=" . $leaf["id"]) . "\"))\n";
+						$dhtml_tree[$i] = "ou" . ($tier) . " = insFld(ou" . abs(($tier-1)) . ", gFld('" . htmlspecialchars($leaf["title"]) . "','" . htmlspecialchars("graph_view.php?action=tree&tree_id=" . $tree["id"] . "&leaf_id=" . $leaf["id"]) . "'))\n";
 						$i++;
 						$dhtml_tree[$i] = "ou" . ($tier) . ".xID = \"tree_" . $tree["id"] . "_leaf_" . $leaf["id"] . "\"\n";
 					}
 				}
 			}
-			$dhtml_tree[$tree_index] = "ou0 = insFld(foldersTree, gFld(\"" . htmlspecialchars($tree["name"]) . "($down_count)\", \"" . htmlspecialchars("graph_view.php?action=tree&tree_id=" . $tree["id"]) . "\"))\n";
+			$dhtml_tree[$tree_index] = "ou0 = insFld(foldersTree, gFld('" . htmlspecialchars($tree["name"]) . "($down_count)','" . htmlspecialchars("graph_view.php?action=tree&tree_id=" . $tree["id"]) . "'))\n";
 		}
 	}
 
