@@ -99,7 +99,7 @@ case 'tree':
 	if ((read_config_option("auth_method") != 0) && (empty($current_user["show_tree"]))) {
 		print "<strong><font size='+1' color='FF0000'>您没有权限使用树状查看</font></strong>"; exit;
 	}
-
+	print '<script type="text/javascript" src="/public/jq.js"></script>';
 	/* if cacti's builtin authentication is turned on then make sure to take
 	graph permissions into account here. if a user does not have rights to a
 	particular graph; do not show it. they will get an access denied message

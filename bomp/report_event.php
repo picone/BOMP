@@ -94,6 +94,10 @@ if (hasRequest('filter_set')) {
     CProfile::update('web.events.filter.priority',getRequest('priority',0),PROFILE_TYPE_INT);
     CProfile::update('web.events.filter.priority',getRequest('priority',0),PROFILE_TYPE_INT);
     CProfile::updateArray('web.events.filter.hostids',getRequest('hostids',array()),PROFILE_TYPE_STR);
+    CProfile::update('web.events.filter.show_trigger',getRequest('show_trigger')?1:0,PROFILE_TYPE_INT);
+    CProfile::update('web.events.filter.show_status',getRequest('show_status')?1:0,PROFILE_TYPE_INT);
+    CProfile::update('web.events.filter.show_priority',getRequest('show_priority')?1:0,PROFILE_TYPE_INT);
+    CProfile::update('web.events.filter.show_acknowledge',getRequest('show_acknowledge')?1:0,PROFILE_TYPE_INT);
 }
 elseif (hasRequest('filter_rst')) {
     DBStart();
@@ -104,6 +108,10 @@ elseif (hasRequest('filter_rst')) {
     CProfile::delete('web.events.filter.priority');
     CProfile::deleteIdx('web.events.filter.groupids');
     CProfile::deleteIdx('web.events.filter.hostids');
+    CProfile::deleteIdx('web.events.filter.show_trigger');
+    CProfile::deleteIdx('web.events.filter.show_status');
+    CProfile::deleteIdx('web.events.filter.show_priority');
+    CProfile::deleteIdx('web.events.filter.show_acknowledge');
     DBend();
 }
 
@@ -114,6 +122,10 @@ $filter=array(
     'status'=>intval(CProfile::get('web.events.filter.status',-1)),
     'priority'=>intval(CProfile::get('web.events.filter.priority',0)),
     'hostids'=>CProfile::getArray('web.events.filter.hostids'),
+    'show_trigger'=>intval(CProfile::get('web.events.filter.show_trigger',1)),
+    'show_status'=>intval(CProfile::get('web.events.filter.show_status',1)),
+    'show_priority'=>intval(CProfile::get('web.events.filter.show_priority',1)),
+    'show_acknowledge'=>intval(CProfile::get('web.events.filter.show_acknowledge',1))
 );
 
 if(isset($filter['hostids'][0])){
@@ -403,7 +415,8 @@ else {
                         '");',
                         'T'
                     )
-                ), 'form_row_r')
+                ), 'form_row_r'),
+                new CCol(new CCheckBox('show_trigger',$filter['show_trigger']),'form_row_l')
             )));
             //状态
             $statusComboBox=new CComboBox('status',getRequest('status'));
@@ -412,7 +425,8 @@ else {
             $statusComboBox->addItem(1,_('Problem'));
             $filterForm->addRow(new CRow(array(
                 new CCOl(_('Status'),'form_row_c'),
-                new CCol($statusComboBox)
+                new CCol($statusComboBox),
+                new CCol(new CCheckBox('show_status',$filter['show_status']),'form_row_l')
             )));
             //严重性
             $priorityComboBox=new CComboBox('priority',$filter['priority']);
@@ -422,7 +436,8 @@ else {
             }
             $filterForm->addRow(new CRow(array(
                 new CCOl(_('Severity'),'form_row_c'),
-                new CCol($priorityComboBox)
+                new CCol($priorityComboBox),
+                new CCol(new CCheckBox('show_priority',$filter['show_priority']),'form_row_l')
             )));
             //知悉
             $ackComboBox=new CComboBox('acknowledge',getRequest('acknowledge'));
@@ -431,7 +446,8 @@ else {
             $ackComboBox->addItem(1,_('Acknowledged'));
             $filterForm->addRow(new CRow(array(
                 new CCOl(_('Acknowledges'),'form_row_c'),
-                new CCol($ackComboBox)
+                new CCol($ackComboBox),
+                new CCol(new CCheckBox('show_acknowledge',$filter['show_acknowledge']),'form_row_l')
             )));
             $filterForm->addItemToBottomRow(new CSubmit('filter_set', _('Filter')));
             $filterForm->addItemToBottomRow(new CSubmit('filter_rst', _('Reset')));
@@ -503,11 +519,11 @@ if ($source == EVENT_SOURCE_DISCOVERY) {
     $header = array(
         _('Time'),
         (getRequest('hostid', 0) == 0) ? _('Host') : null,
-        _('Description'),
-        _('Status'),
-        _('Severity'),
+        $filter['show_trigger']?_('Description'):null,
+        $filter['show_status']?_('Status'):null,
+        $filter['show_priority']?_('Severity'):null,
         _('Duration'),
-        $config['event_ack_enable'] ? _('Ack') : null,
+        $config['event_ack_enable']&&$filter['show_acknowledge'] ? _('Ack') : null,
         _('Actions')
     );
     $table->setHeader($header);
@@ -870,11 +886,11 @@ else {
                         'action'
                     ),
                     $hostName,
-                    $triggerDescription,
-                    $statusSpan,
-                    getSeverityCell($trigger['priority'], null, !$event['value']),
+                    $filter['show_trigger']?$triggerDescription:null,
+                    $filter['show_status']?$statusSpan:null,
+                    $filter['show_priority']?getSeverityCell($trigger['priority'], null, !$event['value']):null,
                     $event['duration'],
-                    $config['event_ack_enable'] ? $ack : null,
+                    $config['event_ack_enable']&&$filter['show_acknowledge'] ? $ack : null,
                     $action
                 ));
                 if($event['acknowledged']>0){

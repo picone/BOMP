@@ -1365,7 +1365,7 @@ function host() {
 	//print $nav;
 
 	$display_text = array(
-		"description" => array("描述", "ASC"),
+		"description" => array("主机名称", "ASC"),
 		"id" => array("编号", "ASC"),
 		"nosort1" => array("图形数量", "ASC"),
 		"nosort2" => array("数据源数量", "ASC"),
