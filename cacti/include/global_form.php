@@ -824,6 +824,24 @@ $fields_host_edit = array(
 		"default" => read_config_option("max_get_size"),
 		"size" => "15"
 		),
+	'alert_setting'=>array(
+		'method'=>'spacer',
+		'friendly_name'=>'告警选项'
+	),
+	'alert_email'=>array(
+		'method'=>'checkbox',
+		'friendly_name'=>'启用邮件通知',
+		'description'=>'当这些主机宕机时是否使用邮件通知',
+		'value'=>'|arg1:enabled|',
+		'default'=>'enable'
+	),
+	'alert_sms'=>array(
+		'method'=>'checkbox',
+		'friendly_name'=>'启用短信通知',
+		'description'=>'当这些主机宕机时是否使用短信通知',
+		'value'=>'|arg1:enabled|',
+		'default'=>'enable'
+	),
 	"header4" => array(
 		"method" => "spacer",
 		"friendly_name" => "额外选项"

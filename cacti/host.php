@@ -41,7 +41,8 @@ $device_actions = array(
 	3 => "禁用",
 	4 => "更改SNMP选项",
 	5 => "清除统计信息",
-	6 => "更改可用性选项"
+	6 => "更改可用性选项",
+	7 => '更改告警方式'
 	);
 
 $device_actions = api_plugin_hook_function('device_action_array', $device_actions);
@@ -229,16 +230,31 @@ function form_actions() {
 						total_polls = '0', failed_polls = '0',	availability = '100.00'
 						where id = '" . $selected_items[$i] . "'");
 			}
-		}elseif ($_POST["drp_action"] == "6") { /* change availability options */
-			for ($i=0;($i<count($selected_items));$i++) {
+		}elseif ($_POST["drp_action"] == "6"){ /* change availability options */
+			for($i=0;($i<count($selected_items));$i++){
 				/* ================= input validation ================= */
 				input_validate_input_number($selected_items[$i]);
 				/* ==================================================== */
 
 				reset($fields_host_edit);
-				while (list($field_name, $field_array) = each($fields_host_edit)) {
-					if (isset($_POST["t_$field_name"])) {
-						db_execute("update host set $field_name = '" . $_POST[$field_name] . "' where id='" . $selected_items[$i] . "'");
+				while(list($field_name,$field_array)=each($fields_host_edit)){
+					if(isset($_POST["t_$field_name"])){
+						db_execute("update host set $field_name = '".$_POST[$field_name]."' where id='".$selected_items[$i]."'");
+					}
+				}
+
+				push_out_host($selected_items[$i]);
+			}
+		}elseif($_POST['drp_action']=='7'){
+			for($i=0;($i<count($selected_items));$i++){
+				/* ================= input validation ================= */
+				input_validate_input_number($selected_items[$i]);
+				/* ==================================================== */
+
+				reset($fields_host_edit);
+				while(list($field_name,$field_array)=each($fields_host_edit)){
+					if(isset($_POST["t_$field_name"])){
+						db_execute('update host set '.$field_name.'='.(isset($_POST[$field_name])&&$_POST[$field_name]=='on'?1:0).' WHERE id='.$selected_items[$i]);
 					}
 				}
 
@@ -359,37 +375,49 @@ function form_actions() {
 					</td>
 					</tr>";
 			$save_html = "<input type='button' value='取消' onClick='window.history.back()'>&nbsp;<input type='submit' value='继续' title='禁用主机'>";
-		}elseif ($_POST["drp_action"] == "4") { /* change snmp options */
+		}elseif ($_POST["drp_action"] == "4"){ /* change snmp options */
 			print "	<tr>
-					<td colspan='2' class='textArea' bgcolor='#" . $colors["form_alternate1"]. "'>
+					<td colspan='2' class='textArea' bgcolor='#".$colors["form_alternate1"]."'>
 						<p>要更改以下主机的SNMP选项,选中需要修改的字段并输入新的值,然后点击 \"继续\".</p>
-						<p><ul>" . $host_list . "</ul></p>
+						<p><ul>".$host_list."</ul></p>
 					</td>
 					</tr>";
-					$form_array = array();
-					while (list($field_name, $field_array) = each($fields_host_edit)) {
-						if ((ereg("^snmp_", $field_name)) ||
-							($field_name == "max_oids")) {
-							$form_array += array($field_name => $fields_host_edit[$field_name]);
+			$form_array=array();
+			while(list($field_name,$field_array)=each($fields_host_edit)){
+				if((ereg("^snmp_",$field_name))||($field_name=="max_oids")){
+					$form_array+=array($field_name=>$fields_host_edit[$field_name]);
 
-							$form_array[$field_name]["value"] = "";
-							$form_array[$field_name]["description"] = "";
-							$form_array[$field_name]["form_id"] = 0;
-							$form_array[$field_name]["sub_checkbox"] = array(
-								"name" => "t_" . $field_name,
-								"friendly_name" => "修改这个字段",
-								"value" => ""
-								);
-						}
-					}
+					$form_array[$field_name]["value"]="";
+					$form_array[$field_name]["description"]="";
+					$form_array[$field_name]["form_id"]=0;
+					$form_array[$field_name]["sub_checkbox"]=array("name"=>"t_".$field_name,"friendly_name"=>"修改这个字段","value"=>"");
+				}
+			}
 
-					draw_edit_form(
-						array(
-							"config" => array("no_form_tag" => true),
-							"fields" => $form_array
-							)
-						);
-			$save_html = "<input type='button' value='取消' onClick='window.history.back()'>&nbsp;<input type='submit' value='继续' title='更改主机的SNMP选项'>";
+			draw_edit_form(array("config"=>array("no_form_tag"=>true),"fields"=>$form_array));
+			$save_html="<input type='button' value='取消' onClick='window.history.back()'>&nbsp;<input type='submit' value='继续' title='更改主机的SNMP选项'>";
+		}elseif($_POST['drp_action']=='7'){
+			print "	<tr>
+					<td colspan='2' class='textArea' bgcolor='#".$colors["form_alternate1"]."'>
+						<p>要更改以下主机的警告方式,请修改指定的主机,然后点击 \"继续\".</p>
+						<p><ul>".$host_list."</ul></p>
+					</td>
+					</tr>";
+
+			$form_array=array();
+			while(list($field_name,$field_array)=each($fields_host_edit)){
+				if(ereg("^alert_",$field_name)){
+					$form_array+=array($field_name=>$fields_host_edit[$field_name]);
+
+					$form_array[$field_name]["value"]="";
+					$form_array[$field_name]["description"]="";
+					$form_array[$field_name]["form_id"]=0;
+					$form_array[$field_name]["sub_checkbox"]=array("name"=>"t_".$field_name,"friendly_name"=>"修改这个字段","value"=>"");
+				}
+			}
+			
+			draw_edit_form(array("config"=>array("no_form_tag"=>true),"fields"=>$form_array));
+			$save_html = "<input type='button' value='取消' onClick='window.history.back()'>&nbsp;<input type='submit' value='继续' title='更改警告方式'>";
 		}elseif ($_POST["drp_action"] == "6") { /* change availability options */
 			print "	<tr>
 					<td colspan='2' class='textArea' bgcolor='#" . $colors["form_alternate1"]. "'>
@@ -470,8 +498,7 @@ function form_actions() {
 				<input type='hidden' name='drp_action' value='" . $_POST["drp_action"] . "'>
 				$save_html
 			</td>
-		</tr>
-		";
+		</tr>		";
 
 	html_end_box();
 
