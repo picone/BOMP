@@ -566,8 +566,8 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 						logger($desc, $breach_up, ($breach_up ? $item['thold_hi'] : $item['thold_low']), $currentval, $trigger, $item['thold_fail_count']);
 					}
 					if (trim($alert_emails) != '') {
-						thold_mail($alert_emails, '', $subject, $msg, $file_array);
-						thold_sms($subject,$thold_sms_text);
+						if($h['alert_email'])thold_mail($alert_emails, '', $subject, $msg, $file_array);
+						if($h['alert_email'])thold_sms($subject,$thold_sms_text);
 					}
 				}
 
@@ -593,9 +593,10 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 						logger($desc, 'ok', 0, $currentval, $trigger, $item['thold_fail_count']);
 					if ($item['thold_fail_count'] >= $trigger) {
 						$subject = $desc . ($thold_show_datasource ? " [$name]" : '') . " 已恢复到正常值: $currentval";
-						if (trim($alert_emails) != '' && $item['restored_alert'] != 'on')
-							thold_mail($alert_emails, '', $subject, $msg, $file_array);
-							thold_sms($subject,$thold_sms_text);
+						if (trim($alert_emails) != '' && $item['restored_alert'] != 'on'&&$h['alert_email']){
+							thold_mail($alert_emails,'',$subject,$msg,$file_array);
+						}
+						if($h['alert_sms'])thold_sms($subject,$thold_sms_text);
 						thold_log(array(
 							'type' => 0,
 							'time' => time(),
@@ -631,9 +632,10 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 				case 0:		// All clear
 					if ($global_bl_notify_enabled && $item['bl_fail_count'] >= $bl_fail_trigger && $item['restored_alert'] != 'on') {
 						$subject = $desc . ($thold_show_datasource ? " [$name]" : '') . " 已恢复到正常值: $currentval";
-						if (trim($alert_emails) != '')
+						if (trim($alert_emails) != ''&&$h['alert_email']){
 							thold_mail($alert_emails, '', $subject, $msg, $file_array);
-							thold_sms($subject,$thold_sms_text);
+						}
+						if($h['alert_sms'])thold_sms($subject,$thold_sms_text);
 					}
 					$item['bl_fail_count'] = 0;
 					break;
@@ -649,9 +651,9 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 							logger($desc, $breach_up, ($breach_up ? $item['thold_hi'] : $item['thold_low']), $currentval, $item['thold_fail_trigger'], $item['thold_fail_count']);
 						}
 						$subject = $desc . ($thold_show_datasource ? " [$name]" : '') . ' ' . ($ra ? 'is still' : 'went') . ' ' . ($item['bl_alert'] == 2 ? 'above' : 'below') . " calculated baseline threshold with $currentval";
-						if (trim($alert_emails) != '')
+						if (trim($alert_emails) != ''&&$h['alert_email'])
 							thold_mail($alert_emails, '', $subject, $msg, $file_array);
-							thold_sms($subject,$thold_sms_text);
+						if($h['alert_sms'])thold_sms($subject,$thold_sms_text);
 					}
 					break;
 			}
@@ -696,9 +698,9 @@ function thold_check_threshold ($rra_id, $data_id, $name, $currentval, $cdef) {
 					if ($logset == 1) {
 						logger($desc, $breach_up, ($breach_up ? $item['time_hi'] : $item['time_low']), $currentval, $trigger, $failures);
 					}
-					if (trim($alert_emails) != '')
+					if (trim($alert_emails) != ''&&$h['alert_email'])
 						thold_mail($alert_emails, '', $subject, $msg, $file_array);
-						thold_sms($subject,$thold_sms_text);
+					if($h['alert_sms'])thold_sms($subject,$thold_sms_text);
 				}
 				thold_log(array(
 					'type' => 2,
@@ -1361,12 +1363,11 @@ function autocreate($hostid) {
 
 /* Sends a group of graphs to a user */
 function thold_mail($to, $from, $subject, $message, $filename, $headers = '') {
+	file_put_contents('debug1',json_encode(debug_backtrace()));
 	global $config;
 	include_once($config['base_path'] . '/plugins/settings/include/mailer.php');
 	include_once($config['base_path'] . '/plugins/thold/setup.php');
-	//发送短信
-	thold_sms($subject,$message);
-	//
+	
 	$subject = iconv("UTF-8", "GB2312//IGNORE", $subject);
 	$subject = trim($subject);
 	$message = iconv("UTF-8", "GB2312//IGNORE", $message);
@@ -1490,6 +1491,7 @@ function thold_mail($to, $from, $subject, $message, $filename, $headers = '') {
 }
 
 function thold_sms($subject,$message){
+	file_put_contents('debug2',json_encode(debug_backtrace()));
 	$phones=read_config_option('alert_phone');
 	if($phones!=''){
 		$phones=explode(',',$phones);

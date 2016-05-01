@@ -163,14 +163,15 @@ function thold_update_host_status () {
 	if (!empty($failed)) {
 		foreach($failed as $id) {
 			if ($id != '') {
-				$host = db_fetch_row('SELECT id, status, description, hostname FROM host WHERE id = ' . $id);
+				$host = db_fetch_row('SELECT id, status, description, hostname,alert_sms,alert_msg FROM host WHERE id = ' . $id);
 				if ($host['status'] == HOST_UP) {
 					$subject = 'BOMP-主机通知: ' . $host['description'] . ' (' . $host['hostname'] . ') 从宕机状态恢复';
 					$msg = $subject;
 					if ($alert_email == '') {
 						cacti_log('THOLD: Can not send Host Recovering email since the \'Alert e-mail\' setting is not set!', true, 'POLLER');
 					} else {
-						thold_mail($alert_email, '', $subject, $msg, '');
+						if($host['alert_email'])thold_mail($alert_email, '', $subject, $msg, '');
+						if($host['alert_sms'])thold_sms($subject,$msg);
 					}
 				}
 			}
@@ -178,7 +179,7 @@ function thold_update_host_status () {
 	}
 
 	// Lets find hosts that are down
-	$hosts = db_fetch_assoc('SELECT id, description, hostname, status_last_error FROM host WHERE disabled="" AND status=' . HOST_DOWN . ' AND status_event_count=' . $ping_failure_count);
+	$hosts = db_fetch_assoc('SELECT id, description, hostname, status_last_error,alert_email,alert_sms FROM host WHERE disabled="" AND status=' . HOST_DOWN . ' AND status_event_count=' . $ping_failure_count);
 	$total_hosts = sizeof($hosts);
 	if (count($hosts)) {
 		foreach($hosts as $host) {
@@ -187,7 +188,8 @@ function thold_update_host_status () {
 			if ($alert_email == '') {
 				cacti_log('THOLD: Can not send Host Down email since the \'Alert e-mail\' setting is not set!', true, 'POLLER');
 			} else {
-				thold_mail($alert_email, '', $subject, $msg, '');
+				if($host['alert_email'])thold_mail($alert_email, '', $subject, $msg, '');
+				if($host['alert_sms'])thold_sms($subject, $msg);
 			}
 		}
 	}
