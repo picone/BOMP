@@ -62,3 +62,12 @@ body{
 .report-serious{
     background-color:#FF3838
 }
+.report-title{
+    font-size:30px;
+    text-align:center;
+}
+.report-title input{
+    width:75%;
+    font-size:30px;
+    text-align:center;
+}

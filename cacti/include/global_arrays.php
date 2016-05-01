@@ -480,7 +480,8 @@ $user_auth_realm_filenames = array(
 	"email_templates.php" => 8,
 	"event_queue.php" => 8,
 	"smtp_queue.php" => 8,
-	"logout.php" => -1
+	"logout.php" => -1,
+	'report_network.php'=>18
 	);
 
 $hash_type_codes = array(

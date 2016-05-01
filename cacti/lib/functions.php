@@ -1780,6 +1780,7 @@ function draw_navigation_text($type = "url") {
 		"templates_export.php:" => array("title" => "导出模板", "mapping" => "index.php:", "url" => "templates_export.php", "level" => "1"),
 		"templates_export.php:save" => array("title" => "导出结果", "mapping" => "index.php:,templates_export.php:", "url" => "templates_export.php", "level" => "2"),
 		"templates_import.php:" => array("title" => "导入模板", "mapping" => "index.php:", "url" => "templates_import.php", "level" => "1"),
+		'report_network.php:'=>array('title'=>'网络监控报告','mapping'=>'index.php:','url'=>'','level'=>'1')
 		);
 
 	$nav =  api_plugin_hook_function('draw_navigation_text', $nav);

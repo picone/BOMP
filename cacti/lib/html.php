@@ -404,7 +404,7 @@ function html_header_sort($header_items, $sort_column, $sort_direction, $last_it
    @arg $sort_direction - the value the current sort direction.  The actual sort direction
         will be opposite this direction if the user selects the same named column.
    @arg $form_action - the url to post the 'select all' form to */
-function html_header_sort_checkbox($header_items, $sort_column, $sort_direction, $include_form = true, $form_action = "") {
+function html_header_sort_checkbox($header_items, $sort_column, $sort_direction, $include_form = true, $form_action = "",$checkbox=true) {
 	global $colors;
 
 	/* reverse the sort direction */
@@ -438,7 +438,12 @@ function html_header_sort_checkbox($header_items, $sort_column, $sort_direction,
 		}
 	}
 
-	print "<td width='1%' align='right' bgcolor='#819bc0' style='" . get_checkbox_style() . "'><input type='checkbox' style='margin: 0px;' name='all' title='全选' onClick='SelectAll(\"chk_\",this.checked)'></td>\n" . ($include_form ? "<form name='chk' method='post' action='$form_action'>\n":"");
+	if($checkbox){
+		print "<td width='1%' align='right' bgcolor='#819bc0' style='" . get_checkbox_style() . "'><input type='checkbox' style='margin: 0px;' name='all' title='全选' onClick='SelectAll(\"chk_\",this.checked)'></td>\n";
+	}
+	if($include_form){
+		print "<form name='chk' method='post' action='$form_action'>\n";
+	}
 	print "</tr>\n";
 }
 
