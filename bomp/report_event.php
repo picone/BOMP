@@ -14,7 +14,7 @@ if (hasRequest('csv_export')) {
 
     require_once dirname(__FILE__).'/include/func.inc.php';
 }else if(hasRequest('print')){
-    $post=array('linkman','department','telphone','description','introduction','problem');
+    $post=array('title','linkman','department','telphone','description','introduction','problem');
     $cmd='/usr/local/bin/wkhtmltopdf';
     $cmd.=' --cookie zbx_sessionid '.$_COOKIE['zbx_sessionid'];
     foreach($post as &$val){
@@ -33,7 +33,7 @@ if (hasRequest('csv_export')) {
     exit;
 }else{
     $csvExport = false;
-    $page['title'] ='事件响应报告';
+    $page['title'] =getRequest('title','事件响应报告');
     $page['file'] = 'events.php';
     $page['hist_arg'] = array('groupid', 'hostid');
     $page['scripts'] = array('class.calendar.js', 'gtlc.js','multiselect.js');
@@ -921,8 +921,8 @@ else {
     ?>
     <link href="/public/report.css" rel="stylesheet" type="text/css"/>
     <script src="/public/report.js" type="application/javascript"></script>
-    <h1><center>事件响应报告</center></h1>
     <form method="post" target="_blank">
+        <h1 class="report-title"><?php if(hasRequest('title')){echo utf8_decode(getRequest('title','事件响应报告'));}else{?><input type="text" name="title" value="事件响应报告"><?php }?></h1>
         <input type="hidden" name="print" value="1">
         <table class="table">
             <thead>

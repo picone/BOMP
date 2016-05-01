@@ -63,6 +63,7 @@ body{
     background-color:#FF3838
 }
 .report-title{
+    padding:8px;
     font-size:30px;
     text-align:center;
 }

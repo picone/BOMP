@@ -89,7 +89,7 @@ if ($_REQUEST["host_rows"] == -1) {
     <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
     <html>
     <head>
-        <title><?php getRequestVar('title','网络监控报告')?></title>
+        <title><?php utf8_decode(getRequestVar('title','网络监控报告'));?></title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
         <link href="/cacti/include/main.css" type="text/css" rel="stylesheet">
         <link href="/cacti/images/favicon.ico" rel="shortcut icon">

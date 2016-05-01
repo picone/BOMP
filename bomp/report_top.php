@@ -1,11 +1,11 @@
 <?php
 require_once dirname(__FILE__).'/include/config.inc.php';
-$page['title']='设备运行情况排名';
+$page['title']=utf8_decode(getRequest('title','设备运行情况前'.getRequest('limit',10).'排名报告'));
 $page['file'] = 'latest.php';
 $page['type'] = detect_page_type(PAGE_TYPE_HTML);
 $page['scripts'] = array('multiselect.js');
 if(hasRequest('print')&&getRequest('print')==1){
-    $post=array('linkman','department','telphone','description','introduction','problem');
+    $post=array('title','linkman','department','telphone','description','introduction','problem');
     $cmd='/usr/local/bin/wkhtmltopdf';
     $cmd.=' --cookie zbx_sessionid '.$_COOKIE['zbx_sessionid'];
     foreach($post as &$val){
@@ -47,8 +47,8 @@ if ($filter['groupids'] !== null) {
 ?>
 <link href="/public/report.css" rel="stylesheet" type="text/css"/>
 <script src="/public/report.js" type="application/javascript"></script>
-<h1><center>设备运行情况前<?php echo $filter['limit']?>排名报告</center></h1>
 <form method="post" target="_blank">
+    <h1 class="report-title"><?php if(hasRequest('title')){echo $page['title'];}else{?><input type="text" name="title" value="设备运行情况前<?php echo $filter['limit']?>排名报告"><?php }?></h1>
     <input type="hidden" name="print" value="1">
     <table class="table">
         <thead>

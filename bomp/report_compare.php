@@ -2,7 +2,7 @@
 require_once dirname(__FILE__).'/include/config.inc.php';
 require_once dirname(__FILE__).'/include/reports.inc.php';
 
-$page['title']='对比指标报告';
+$page['title']=getRequest('title','对比指标报告');
 $page['file']='report6.php';
 $page['hist_arg']=array('period');
 $page['scripts'] = array('class.calendar.js');
@@ -218,9 +218,7 @@ if(hasRequest('report_show')||hasRequest('linkman')) {
     ?>
     <link href="/public/report.css" rel="stylesheet" type="text/css"/>
     <script src="/public/report.js" type="application/javascript"></script>
-    <h1>
-        <center>对比指标报告</center>
-    </h1>
+    <h1 class="report-title"><?php echo $page['title'];?></h1>
     <form method="post" target="_blank">
         <input type="hidden" name="print" value="1">
         <input type="hidden" name="picture_src" value="<?php if(isset($src)){echo $src;}?>">

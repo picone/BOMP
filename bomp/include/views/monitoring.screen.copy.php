@@ -1,4 +1,5 @@
 <?php
+global $page;
 $screenWidget = new CWidget();
 //显示过滤器的
 $div=new CDiv(null, null,'scrollbar_cntr');
@@ -87,8 +88,8 @@ if (empty($this->data['screens'])) {
     ?>
     <link href="/public/report.css" rel="stylesheet" type="text/css"/>
     <script src="/public/report.js" type="application/javascript"></script>
-    <h1><center>报告屏报告</center></h1>
     <form method="post" target="_blank">
+        <h1 class="report-title"><?php if(hasRequest('title')){echo $page['title'];}else{?><input type="text" name="title" value="报告屏报告"><?php }?></h1>
         <input type="hidden" name="print" value="1">
         <table class="table">
             <thead>

@@ -2,11 +2,11 @@
 require_once dirname(__FILE__).'/include/config.inc.php';
 require_once dirname(__FILE__).'/include/triggers.inc.php';
 require_once dirname(__FILE__).'/include/services.inc.php';
-$page['title']='可用性报表';
+$page['title']=utf8_decode(getRequest('title','服务可用性报告'));
 $page['file']='srv_status.php';
 $page['hist_arg']=array();
 if(hasRequest('print')&&getRequest('print')==1){
-    $post=array('linkman','department','telphone','description','introduction','problem');
+    $post=array('title','linkman','department','telphone','description','introduction','problem');
     $cmd='/usr/local/bin/wkhtmltopdf';
     $cmd.=' --cookie zbx_sessionid '.$_COOKIE['zbx_sessionid'].' --cookie tree_admin_service_status_tree 1';
     foreach($post as &$val){
@@ -114,8 +114,8 @@ if ($tree) {
     ?>
     <link href="/public/report.css" rel="stylesheet" type="text/css"/>
     <script src="/public/report.js" type="application/javascript"></script>
-    <h1><center>服务可用性报告</center></h1>
     <form method="post" target="_blank">
+        <h1 class="report-title"><?php if(hasRequest('title')){echo $page['title'];}else{?><input type="text" name="title" value="服务可用性报告"><?php }?></h1>
         <input type="hidden" name="print" value="1">
         <table class="table">
             <thead>

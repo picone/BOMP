@@ -4,13 +4,13 @@ require_once dirname(__FILE__).'/include/graphs.inc.php';
 require_once dirname(__FILE__).'/include/screens.inc.php';
 require_once dirname(__FILE__).'/include/blocks.inc.php';
 
-$page['title']='报告屏报告';
+$page['title']=utf8_decode(getRequest('title','报告屏报告'));
 $page['file'] = 'screens.php';
 $page['hist_arg'] = array('elementid', 'screenname');
 $page['scripts'] = array('class.calendar.js', 'gtlc.js', 'flickerfreescreen.js');
 $page['type'] = detect_page_type(PAGE_TYPE_HTML);
 if(hasRequest('print')){
-    $post=array('linkman','department','telphone','description','introduction','problem');
+    $post=array('title','linkman','department','telphone','description','introduction','problem');
     $cmd='/usr/local/bin/wkhtmltopdf';
     $cmd.=' --cookie zbx_sessionid '.$_COOKIE['zbx_sessionid'];
     foreach($post as &$val){
