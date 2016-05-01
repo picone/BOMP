@@ -1363,7 +1363,6 @@ function autocreate($hostid) {
 
 /* Sends a group of graphs to a user */
 function thold_mail($to, $from, $subject, $message, $filename, $headers = '') {
-	file_put_contents('debug1',json_encode(debug_backtrace()));
 	global $config;
 	include_once($config['base_path'] . '/plugins/settings/include/mailer.php');
 	include_once($config['base_path'] . '/plugins/thold/setup.php');
@@ -1491,7 +1490,6 @@ function thold_mail($to, $from, $subject, $message, $filename, $headers = '') {
 }
 
 function thold_sms($subject,$message){
-	file_put_contents('debug2',json_encode(debug_backtrace()));
 	$phones=read_config_option('alert_phone');
 	if($phones!=''){
 		$phones=explode(',',$phones);
