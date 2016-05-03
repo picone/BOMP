@@ -373,7 +373,7 @@ function html_header_sort($header_items, $sort_column, $sort_direction, $last_it
 		/* by default, you will always sort ascending, with the exception of an already sorted column */
 		if ($sort_column == $db_column) {
 			$direction = $new_sort_direction;
-			$display_text = $display_array[0] . "**";
+			$display_text = $display_array[0] .($sort_direction=='DESC'?'↑':'↓');
 		}else{
 			$display_text = $display_array[0];
 			$direction = $display_array[1];
@@ -423,7 +423,7 @@ function html_header_sort_checkbox($header_items, $sort_column, $sort_direction,
 		/* by default, you will always sort ascending, with the exception of an already sorted column */
 		if ($sort_column == $db_column) {
 			$direction = $new_sort_direction;
-			$display_text = $display_array[0] . "**";
+			$display_text = $display_array[0] .($sort_direction=='DESC'?'↑':'↓');
 		}else{
 			$display_text = $display_array[0];
 			$direction = $display_array[1];

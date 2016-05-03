@@ -170,7 +170,7 @@ if ($_REQUEST["host_rows"] == -1) {
     <table width="100%" cellspacing="0" cellpadding="0">
     <td width="100%" valign="top">
     <?php
-    if(!getRequestVar('linkman')){
+    if(!getRequestVar('title')){
         html_start_box("<strong>主机</strong>","100%",$colors["header"],"3","center",'');
         ?>
         <tr bgcolor="#<?php print $colors["panel"]; ?>">
@@ -395,7 +395,7 @@ if (sizeof($hosts) > 0) {
     }
 
     /* put the nav bar on the bottom as well */
-    if(!getRequestVar('linkman')){
+    if(!getRequestVar('title')){
         $nav = "<tr bgcolor='#" . $colors["header"] . "'>
 			<td colspan='11'>
 				<table width='100%' cellspacing='0' cellpadding='0' border='0'>
