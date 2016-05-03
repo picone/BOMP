@@ -832,15 +832,15 @@ $fields_host_edit = array(
 		'method'=>'checkbox',
 		'friendly_name'=>'启用邮件通知',
 		'description'=>'当这些主机宕机时是否使用邮件通知',
-		'value'=>'|arg1:enabled|',
-		'default'=>'enable'
+		'value'=>'|arg1:alert_email|',
+		'default'=>'on'
 	),
 	'alert_sms'=>array(
 		'method'=>'checkbox',
 		'friendly_name'=>'启用短信通知',
 		'description'=>'当这些主机宕机时是否使用短信通知',
-		'value'=>'|arg1:enabled|',
-		'default'=>'enable'
+		'value'=>'|arg1:alert_sms|',
+		'default'=>'on'
 	),
 	"header4" => array(
 		"method" => "spacer",

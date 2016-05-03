@@ -158,7 +158,8 @@ function form_save() {
 				$_POST["ping_port"], $_POST["ping_timeout"],
 				$_POST["ping_retries"], $_POST["notes"],
 				$_POST["snmp_auth_protocol"], $_POST["snmp_priv_passphrase"],
-				$_POST["snmp_priv_protocol"], $_POST["snmp_context"], $_POST["max_oids"]);
+				$_POST["snmp_priv_protocol"], $_POST["snmp_context"], $_POST["max_oids"],
+				$_POST['alert_email']=='on'?1:0,$_POST['alert_sms']=='on'?1:0);
 		}
 
 		header("Location: host.php?action=edit&id=" . (empty($host_id) ? $_POST["id"] : $host_id));
@@ -692,6 +693,8 @@ function host_edit() {
 	if (!empty($_GET["host_template_id"])) {
 		$fields_host_edit["host_template_id"]["value"] = $_GET["host_template_id"];
 	}
+	$host['alert_email']=$host['alert_email']?'on':'off';
+	$host['alert_sms']=$host['alert_sms']?'on':'off';
 	draw_edit_form(array(
 		"config" => array("form_name" => "chk"),
 		"fields" => inject_form_variables($fields_host_edit, (isset($host) ? $host : array()))
