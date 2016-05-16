@@ -163,7 +163,7 @@ function thold_update_host_status () {
 	if (!empty($failed)) {
 		foreach($failed as $id) {
 			if ($id != '') {
-				$host = db_fetch_row('SELECT id, status, description, hostname,alert_sms,alert_msg FROM host WHERE id = ' . $id);
+				$host = db_fetch_row('SELECT id, status, description, hostname,alert_sms,alert_email FROM host WHERE id = ' . $id);
 				if ($host['status'] == HOST_UP) {
 					$subject = 'BOMP-主机通知: ' . $host['description'] . ' (' . $host['hostname'] . ') 从宕机状态恢复';
 					$msg = $subject;
