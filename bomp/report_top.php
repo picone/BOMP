@@ -187,7 +187,6 @@ JOIN hosts USING (hostid) JOIN hosts_groups USING (hostid) WHERE groupid IN ('.i
     $MemoryWidget->setHeader('内存占用排名');
     $widget->addItem($MemoryWidget);
     $widget->addItem(BR());
-    //硬盘排名vfs.fs.size[/,pfree]
     $DiskTable=new CTableInfo('暂无监控主机');
     $DiskTable->setHeader(array(
         SPACE,
@@ -197,7 +196,7 @@ JOIN hosts USING (hostid) JOIN hosts_groups USING (hostid) WHERE groupid IN ('.i
         '磁盘占用'
     ));
     $items=DBfetchArray(DBselect('SELECT host,history.hostid,history.itemid,value,clock FROM (
-SELECT itemid,hostid,TRUNCATE(SUM(cache_history_uint.value)/disk_total.value*100,2) AS value,cache_history_uint.clock FROM cache_history_uint JOIN items USING (itemid) JOIN (SELECT hostid,SUM(value) AS value FROM cache_history_uint JOIN items USING (itemid) WHERE key_ LIKE \'vfs.fs.size[%,total]\' GROUP BY hostid) AS disk_total USING (hostid) WHERE key_ LIKE \'vfs.fs.size[%,free]\' GROUP BY hostid
+SELECT itemid,hostid,TRUNCATE((1-SUM(cache_history_uint.value)/disk_total.value)*100,2) AS value,cache_history_uint.clock FROM cache_history_uint JOIN items USING (itemid) JOIN (SELECT hostid,SUM(value) AS value FROM cache_history_uint JOIN items USING (itemid) WHERE key_ LIKE \'vfs.fs.size[%,total]\' GROUP BY hostid) AS disk_total USING (hostid) WHERE key_ LIKE \'vfs.fs.size[%,free]\' GROUP BY hostid
 ) AS history JOIN hosts USING (hostid) JOIN hosts_groups USING (hostid) WHERE groupid IN ('.implode(',',$filter['groupids']).') ORDER BY value DESC LIMIT '.$filter['limit']));
     foreach($items as $key=>&$val){
         $DiskTable->addRow(array(
